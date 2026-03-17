@@ -10,8 +10,16 @@ Verum is a structured evidence intelligence platform designed for pharmaceutical
 
 This repository documents the concept architecture, data model, and pipeline design. It is a portfolio artifact developed alongside [Evidence Mapper](https://evidence-mapper.com) to demonstrate product and data architecture thinking in regulated health data contexts.
 
-**Status:** Architecture designed and validated. Data model complete. Build not yet started.
+**Status:** Architecture designed and validated. Data model complete. UI prototype live.
 
+---
+
+## Prototype
+
+[![Verum UI prototype — Evidence Browser](preview.png)](https://mczuzu.github.io/verum/prototype.html)
+
+> UI prototype showing the Evidence Browser, PICO-structured evidence units across AEMPS, NICE, and G-BA, and the Gap Analysis view.
+> [**Open prototype →**](https://mczuzu.github.io/verum/prototype.html)
 ---
 
 ## The Core Insight
