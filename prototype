@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verum — HTA Evidence Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--border:#2a3040;--border2:#3a4458;--text:#e8ecf4;--text2:#8b95aa;--text3:#5a6478;--accent:#4f7ef8;--accent2:#2a50c8;--green:#2ec27e;--green-bg:#0d2a1c;--amber:#e8a030;--amber-bg:#2a1e08;--red:#e85050;--red-bg:#2a0e0e;--blue-bg:#0d1a3a;--radius:6px;--radius2:10px;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.5;min-height:100vh;display:flex}
+.sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0}
+.logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.logo-mark{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--text);letter-spacing:-.5px}
+.logo-sub{font-size:10px;color:var(--text3);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.nav{padding:12px 0;flex:1}
+.nav-section{padding:12px 20px 4px;font-size:9px;font-family:var(--mono);color:var(--text3);letter-spacing:.12em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 20px;cursor:pointer;color:var(--text2);font-size:13px;border-left:2px solid transparent;transition:all .15s}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--accent);background:var(--blue-bg);border-left-color:var(--accent)}
+.nav-badge{margin-left:auto;background:var(--accent2);color:var(--accent);font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:10px}
+.corpus-status{padding:16px 20px;border-top:1px solid var(--border)}
+.corpus-label{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.corpus-stat{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)}
+.corpus-stat:last-child{border:none}
+.corpus-stat-label{color:var(--text2);font-size:11px}
+.corpus-stat-value{font-family:var(--mono);font-size:11px;color:var(--text)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.header-title{font-size:14px;font-weight:500;color:var(--text)}
+.header-sub{font-size:12px;color:var(--text3);font-family:var(--mono);margin-left:12px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.btn{padding:6px 14px;border-radius:var(--radius);font-size:12px;font-family:var(--sans);font-weight:500;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:#6b8ef9}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.content{padding:24px 28px;flex:1}
+.screen{display:none}
+.screen.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:16px 20px}
+.metric-label{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.metric-value{font-size:28px;font-family:var(--mono);font-weight:300;color:var(--text);line-height:1}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.metric-delta{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:4px;margin-top:4px}
+.delta-up{background:var(--green-bg);color:var(--green)}
+.delta-neutral{background:var(--blue-bg);color:var(--accent)}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden}
+.table-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.table-title{font-size:13px;font-weight:500}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 20px;font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+td{padding:12px 20px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2);cursor:pointer}
+.mono{font-family:var(--mono);font-size:11px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);white-space:nowrap}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-blue{background:var(--blue-bg);color:var(--accent)}
+.badge-gray{background:var(--surface2);color:var(--text2)}
+.agency-tag{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--mono);font-size:11px;color:var(--text2)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-label{font-size:11px;color:var(--text3);font-family:var(--mono)}
+select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;color:var(--text2);font-size:12px;font-family:var(--sans);outline:none;cursor:pointer}
+select:focus{border-color:var(--accent)}
+.gap-setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:24px;margin-bottom:24px;display:grid;grid-template-columns:1fr 40px 1fr 1fr auto;gap:12px;align-items:end}
+.field-group{display:flex;flex-direction:column;gap:6px}
+.field-label{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em}
+.arrow-divider{display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:18px;padding-bottom:2px}
+.gap-results{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.gap-column-header{padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius2) var(--radius2) 0 0;font-size:11px;font-family:var(--mono);color:var(--text2);display:flex;align-items:center;justify-content:space-between}
+.gap-count{background:var(--accent2);color:var(--accent);padding:2px 8px;border-radius:10px;font-size:10px}
+.gap-cards{border:1px solid var(--border);border-radius:0 0 var(--radius2) var(--radius2);overflow:hidden}
+.gap-card{padding:16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.gap-card:last-child{border-bottom:none}
+.gap-card:hover{background:var(--surface2)}
+.gap-card-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px}
+.gap-card-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.gap-stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:4px 10px;font-family:var(--mono);font-size:11px;color:var(--text2)}
+.gap-stat span{color:var(--text)}
+.gap-rationale{font-size:11px;color:var(--text3);font-style:italic;line-height:1.4;border-left:2px solid var(--border2);padding-left:10px;margin-top:8px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden}
+.detail-card-header{padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;justify-content:space-between}
+.conf-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.conf-high{background:var(--green)}
+.conf-med{background:var(--amber)}
+.conf-low{background:var(--red)}
+.detail-card-body{padding:14px 16px}
+.detail-field{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);gap:16px}
+.detail-field:last-child{border:none}
+.detail-field-label{font-size:11px;color:var(--text3);font-family:var(--mono);flex-shrink:0;min-width:100px}
+.detail-field-value{font-size:11px;color:var(--text);text-align:right;word-break:break-word}
+.hr-value{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text)}
+.ci-value{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.prov-timeline{padding:0 16px 16px}
+.prov-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.prov-item:last-child{border:none}
+.prov-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0}
+.prov-action{font-size:11px;color:var(--text);font-weight:500;margin-bottom:2px}
+.prov-meta{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
+.prov-quote{font-size:10px;color:var(--text2);font-style:italic;background:var(--surface2);border-left:2px solid var(--accent);padding:6px 10px;border-radius:0 var(--radius) var(--radius) 0;margin-top:6px;line-height:1.5}
+.ingest-upload{border:2px dashed var(--border2);border-radius:var(--radius2);padding:40px;text-align:center;margin-bottom:24px;cursor:pointer;transition:all .2s;background:var(--surface)}
+.ingest-upload:hover{border-color:var(--accent);background:var(--blue-bg)}
+.ingest-upload-icon{font-size:32px;margin-bottom:12px}
+.ingest-upload-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px}
+.ingest-upload-sub{font-size:12px;color:var(--text3)}
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px}
+.status-validated{background:var(--green)}
+.status-draft{background:var(--amber)}
+.status-processing{background:var(--accent);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.drug-chip{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
+.indication-chip{font-size:11px;color:var(--text3);margin-top:2px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.empty-state{padding:60px 20px;text-align:center;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:12px}
+.empty-title{font-size:14px;color:var(--text2);margin-bottom:6px}
+.acceptance-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:16px}
+.acceptance-row{display:grid;grid-template-columns:140px 130px 1fr;border-bottom:1px solid var(--border);align-items:center}
+.acceptance-row:last-child{border-bottom:none}
+.acceptance-agency{padding:12px 16px;border-right:1px solid var(--border)}
+.acceptance-status-cell{padding:12px 16px;border-right:1px solid var(--border)}
+.acceptance-detail{padding:12px 16px;font-size:11px;color:var(--text2);line-height:1.5}
+.restriction-tag{display:inline-block;background:var(--amber-bg);color:var(--amber);border:1px solid #3a2e08;padding:2px 8px;border-radius:var(--radius);font-family:var(--mono);font-size:10px;margin-top:4px}
+.full-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:16px}
+.full-card-header{padding:12px 20px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:8px}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text3);font-size:12px;cursor:pointer;margin-bottom:20px;transition:color .15s}
+.back-btn:hover{color:var(--text2)}
+.gap-message{background:var(--blue-bg);border:1px solid var(--accent2);border-radius:var(--radius2);padding:16px 20px;font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.6}
+.gap-message strong{color:var(--accent)}
+input[type="text"]{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;color:var(--text);font-size:12px;font-family:var(--sans);outline:none}
+input[type="text"]:focus{border-color:var(--accent)}
+input[type="text"]::placeholder{color:var(--text3)}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">verum</div>
+    <div class="logo-sub">HTA Evidence Intelligence</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Platform</div>
+    <div class="nav-item" onclick="showScreen('ingest')"><span>⬆</span> Document Ingest <span class="nav-badge">3</span></div>
+    <div class="nav-item active" onclick="showScreen('browse')"><span>◫</span> Evidence Browser</div>
+    <div class="nav-section">Analysis</div>
+    <div class="nav-item" onclick="showScreen('gap')"><span>△</span> Gap Analysis</div>
+  </nav>
+  <div class="corpus-status">
+    <div class="corpus-label">Corpus Status</div>
+    <div class="corpus-stat"><span class="corpus-stat-label">Evidence units</span><span class="corpus-stat-value">12</span></div>
+    <div class="corpus-stat"><span class="corpus-stat-label">Validated</span><span class="corpus-stat-value" style="color:var(--green)">9</span></div>
+    <div class="corpus-stat"><span class="corpus-stat-label">Documents</span><span class="corpus-stat-value">7</span></div>
+    <div class="corpus-stat"><span class="corpus-stat-label">Last ingest</span><span class="corpus-stat-value">Mar 14</span></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <div style="display:flex;align-items:center">
+      <span class="header-title" id="header-title">Evidence Browser</span>
+      <span class="header-sub" id="header-sub">12 evidence units · 3 agencies</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm">Export</button>
+      <button class="btn btn-primary btn-sm" onclick="showScreen('ingest')">+ Add Document</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- SCREEN: INGEST -->
+    <div id="screen-ingest" class="screen">
+      <div class="metrics">
+        <div class="metric-card"><div class="metric-label">Documents</div><div class="metric-value">7</div><span class="metric-delta delta-up">+2 this week</span></div>
+        <div class="metric-card"><div class="metric-label">Processed</div><div class="metric-value">6</div><div class="metric-sub">1 awaiting review</div></div>
+        <div class="metric-card"><div class="metric-label">Validated</div><div class="metric-value">9</div><div class="metric-sub">evidence units</div></div>
+        <div class="metric-card"><div class="metric-label">Avg confidence</div><div class="metric-value mono" style="font-size:24px">0.84</div><span class="metric-delta delta-neutral">per field</span></div>
+      </div>
+      <div class="ingest-upload" onclick="alert('Live version: uploads PDF to Supabase Storage and triggers extract-from-pdf Edge Function.')">
+        <div class="ingest-upload-icon">⬆</div>
+        <div class="ingest-upload-title">Drop HTA documents here</div>
+        <div class="ingest-upload-sub">IPTs · NICE STAs · G-BA dossiers · PDF</div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-title">Source Documents</span></div>
+        <table><thead><tr><th>Document</th><th>Agency</th><th>Indication</th><th>Decision</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><div class="mono" style="color:var(--text)">IPT 043/2024 v.1</div><div style="font-size:11px;color:var(--text3)">Pembrolizumab · NSCLC 1L</div></td><td><div class="agency-tag">🇪🇸 AEMPS</div></td><td style="font-size:11px;color:var(--text2)">NSCLC stage III/IV PD-L1 CPS ≥ 10</td><td style="font-size:11px">Jan 2024</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('pembrolizumab-aemps')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">TA 888 v.1</div><div style="font-size:11px;color:var(--text3)">Pembrolizumab · NSCLC 1L</div></td><td><div class="agency-tag">🇬🇧 NICE</div></td><td style="font-size:11px;color:var(--text2)">NSCLC stage III/IV PD-L1 TPS ≥ 50%</td><td style="font-size:11px">Nov 2023</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('pembrolizumab-nice')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">IPT 021/2023 v.1</div><div style="font-size:11px;color:var(--text3)">Nivolumab · NSCLC 2L</div></td><td><div class="agency-tag">🇪🇸 AEMPS</div></td><td style="font-size:11px;color:var(--text2)">NSCLC post-platinum, PD-L1 ≥ 1%</td><td style="font-size:11px">Sep 2023</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('nivolumab-aemps')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">TA 833 v.1</div><div style="font-size:11px;color:var(--text3)">Nivolumab · NSCLC 2L</div></td><td><div class="agency-tag">🇬🇧 NICE</div></td><td style="font-size:11px;color:var(--text2)">NSCLC squamous, post-platinum</td><td style="font-size:11px">Jun 2023</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('nivolumab-nice')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">GBA-2024-0128</div><div style="font-size:11px;color:var(--text3)">Pembrolizumab · NSCLC 1L</div></td><td><div class="agency-tag">🇩🇪 G-BA</div></td><td style="font-size:11px;color:var(--text2)">NSCLC non-squamous, PD-L1 TPS ≥ 50%</td><td style="font-size:11px">Mar 2024</td><td><span class="badge badge-amber"><span class="status-dot status-draft"></span>Draft</span></td><td><button class="btn btn-primary btn-sm" onclick="showDetail('pembrolizumab-gba')">Review →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">IPT 019/2024 v.1</div><div style="font-size:11px;color:var(--text3)">Atezolizumab · NSCLC 1L</div></td><td><div class="agency-tag">🇪🇸 AEMPS</div></td><td style="font-size:11px;color:var(--text2)">NSCLC non-squamous, no EGFR/ALK</td><td style="font-size:11px">Feb 2024</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('atezolizumab-aemps')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">IPT 055/2024 v.1</div><div style="font-size:11px;color:var(--text3)">Durvalumab · NSCLC stage III</div></td><td><div class="agency-tag">🇪🇸 AEMPS</div></td><td style="font-size:11px;color:var(--text2)">NSCLC unresectable stage III, post-CRT</td><td style="font-size:11px">May 2024</td><td><span class="badge badge-blue"><span class="status-dot status-processing"></span>Extracting</span></td><td><button class="btn btn-ghost btn-sm" disabled style="opacity:.4">Wait...</button></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- SCREEN: BROWSE -->
+    <div id="screen-browse" class="screen active">
+      <div class="metrics">
+        <div class="metric-card"><div class="metric-label">Evidence units</div><div class="metric-value">12</div><span class="metric-delta delta-neutral">across 3 agencies</span></div>
+        <div class="metric-card"><div class="metric-label">Drugs covered</div><div class="metric-value">4</div><div class="metric-sub">PD-1/PD-L1 inhibitors</div></div>
+        <div class="metric-card"><div class="metric-label">Cross-agency matches</div><div class="metric-value">6</div><span class="metric-delta delta-up">same PICO, 2+ agencies</span></div>
+        <div class="metric-card"><div class="metric-label">Gap candidates</div><div class="metric-value">4</div><span class="metric-delta delta-neutral">NICE accepted, not AEMPS</span></div>
+      </div>
+      <div class="filters">
+        <span class="filter-label">Filter:</span>
+        <select><option>All agencies</option><option>AEMPS</option><option>NICE</option><option>G-BA</option></select>
+        <select><option>All drugs</option><option>Pembrolizumab</option><option>Nivolumab</option><option>Atezolizumab</option></select>
+        <select><option>All statuses</option><option>Accepted</option><option>Restricted</option><option>Rejected</option></select>
+        <input type="text" placeholder="Search indication..." style="width:200px">
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-title">Evidence Units</span><span style="font-size:11px;color:var(--text3);font-family:var(--mono)">12 results</span></div>
+        <table><thead><tr><th>Drug · Indication</th><th>Agency</th><th>Population</th><th>Comparator</th><th>Primary HR</th><th>Status</th><th></th></tr></thead>
+        <tbody id="browse-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SCREEN: GAP -->
+    <div id="screen-gap" class="screen">
+      <div class="gap-setup">
+        <div class="field-group"><div class="field-label">Source agency</div>
+          <select id="gap-source" style="width:100%"><option value="NICE">🇬🇧 NICE</option><option value="AEMPS">🇪🇸 AEMPS</option><option value="G-BA">🇩🇪 G-BA</option></select></div>
+        <div class="arrow-divider">→</div>
+        <div class="field-group"><div class="field-label">Target agency</div>
+          <select id="gap-target" style="width:100%"><option value="AEMPS">🇪🇸 AEMPS</option><option value="NICE">🇬🇧 NICE</option><option value="G-BA">🇩🇪 G-BA</option></select></div>
+        <div class="field-group"><div class="field-label">Drug (optional)</div>
+          <select id="gap-drug" style="width:100%"><option value="">All drugs</option><option value="pembrolizumab">Pembrolizumab</option><option value="nivolumab">Nivolumab</option></select></div>
+        <button class="btn btn-primary" onclick="runGapAnalysis()">Find Gaps</button>
+      </div>
+      <div id="gap-results-area">
+        <div class="empty-state"><div class="empty-icon">△</div><div class="empty-title">Select agencies and run analysis</div><div style="font-size:12px;color:var(--text3)">Shows evidence accepted by source but not evaluated by target</div></div>
+      </div>
+    </div>
+
+    <!-- SCREEN: DETAIL -->
+    <div id="screen-detail" class="screen">
+      <div class="back-btn" onclick="showScreen('browse')">← Back to browser</div>
+      <div id="detail-content"></div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const EU=[{id:'pembrolizumab-aemps',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 043/2024',population:'NSCLC stage III/IV, no EGFR/ALK, PD-L1 CPS ≥ 10',biomarker:'PD-L1 CPS ≥ 10',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.69,ci_low:0.56,ci_high:0.85,pval:'0.0003',status:'validated',acceptance:'accepted',restrictions:'PD-L1 CPS ≥ 10 only',rationale:'Pembrolizumab demostró superioridad estadísticamente significativa en SG frente a quimioterapia de platino en la población PD-L1 CPS ≥ 10.',quote:'Se recomienda el uso de pembrolizumab en primera línea en pacientes con CPNM avanzado con expresión de PD-L1 CPS ≥ 10 que no presenten mutaciones EGFR ni reordenamientos ALK.',quotePage:8,extractedAt:'2024-03-10 09:14',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-11 14:32',cP:0.91,cI:0.97,cC:0.94,cO:0.88},
+{id:'pembrolizumab-nice',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'NICE',flag:'🇬🇧',docRef:'TA 888',population:'NSCLC stage III/IV, no EGFR/ALK, PD-L1 TPS ≥ 50%',biomarker:'PD-L1 TPS ≥ 50%',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.63,ci_low:0.50,ci_high:0.79,pval:'< 0.001',status:'validated',acceptance:'accepted',restrictions:'PD-L1 TPS ≥ 50%; NHS commissioning criteria apply',rationale:'NICE recommends pembrolizumab as an option for untreated PD-L1 positive (TPS ≥ 50%) NSCLC without EGFR or ALK aberrations.',quote:'Pembrolizumab is recommended as an option for untreated PD-L1-positive (with a TPS of 50% or more) locally advanced or metastatic NSCLC in adults.',quotePage:4,extractedAt:'2024-03-12 11:05',model:'gpt-4o-2024-05-13',validatedBy:'Dr. Smith (HEOR)',validatedAt:'2024-03-13 10:17',cP:0.93,cI:0.98,cC:0.95,cO:0.92},
+{id:'pembrolizumab-gba',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'G-BA',flag:'🇩🇪',docRef:'GBA-2024-0128',population:'NSCLC non-squamous, no EGFR/ALK, PD-L1 TPS ≥ 50%',biomarker:'PD-L1 TPS ≥ 50%',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-pemetrexed chemotherapy',comparatorType:'active',hr:0.71,ci_low:0.56,ci_high:0.90,pval:'0.004',status:'draft',acceptance:'restricted',restrictions:'Non-squamous only; TPS ≥ 50%',rationale:'Hinweis auf einen beträchtlichen Zusatznutzen bei Patienten mit nicht-squamösem NSCLC und PD-L1 TPS ≥ 50%.',quote:'Für die Patientengruppe mit nicht-plattenepithelialem NSCLC und TPS ≥ 50% ergibt sich ein Hinweis auf einen beträchtlichen Zusatznutzen.',quotePage:12,extractedAt:'2024-03-14 08:45',model:'gpt-4o-2024-05-13',validatedBy:null,validatedAt:null,cP:0.87,cI:0.96,cC:0.82,cO:0.79},
+{id:'nivolumab-aemps',drug:'Nivolumab',inn:'nivolumab',indication:'NSCLC 2L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 021/2023',population:'NSCLC post-platinum chemotherapy, PD-L1 ≥ 1%',biomarker:'PD-L1 ≥ 1%',lot:'2L',intervention:'Nivolumab 3mg/kg Q2W',comparator:'Docetaxel 75mg/m² Q3W',comparatorType:'active',hr:0.73,ci_low:0.59,ci_high:0.89,pval:'0.002',status:'validated',acceptance:'accepted',restrictions:null,rationale:'Nivolumab demostró una mejoría estadísticamente significativa en la supervivencia global frente a docetaxel en pacientes previamente tratados con platino.',quote:'Se recomienda nivolumab en segunda línea en pacientes con CPNM avanzado previamente tratados con quimioterapia de platino, independientemente de la expresión de PD-L1.',quotePage:6,extractedAt:'2024-03-08 14:22',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-09 16:45',cP:0.89,cI:0.95,cC:0.93,cO:0.91},
+{id:'nivolumab-nice',drug:'Nivolumab',inn:'nivolumab',indication:'NSCLC 2L',agency:'NICE',flag:'🇬🇧',docRef:'TA 833',population:'NSCLC squamous, post-platinum, all PD-L1 levels',biomarker:'No biomarker restriction',lot:'2L',intervention:'Nivolumab 240mg Q2W',comparator:'Docetaxel 75mg/m² Q3W',comparatorType:'active',hr:0.59,ci_low:0.44,ci_high:0.79,pval:'< 0.001',status:'validated',acceptance:'accepted',restrictions:'Squamous histology only per NHS commissioning',rationale:'NICE recommends nivolumab for previously treated squamous NSCLC, noting superior OS vs docetaxel without PD-L1 restriction.',quote:'Nivolumab is recommended as an option for treating locally advanced or metastatic squamous NSCLC after prior chemotherapy in adults.',quotePage:3,extractedAt:'2024-03-09 10:15',model:'gpt-4o-2024-05-13',validatedBy:'Dr. Smith (HEOR)',validatedAt:'2024-03-10 09:30',cP:0.92,cI:0.97,cC:0.96,cO:0.94},
+{id:'atezolizumab-aemps',drug:'Atezolizumab',inn:'atezolizumab',indication:'NSCLC 1L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 019/2024',population:'NSCLC non-squamous, no EGFR/ALK, PD-L1 TC ≥ 50% or IC ≥ 10%',biomarker:'PD-L1 TC ≥ 50% or IC ≥ 10%',lot:'1L',intervention:'Atezolizumab 1200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.78,ci_low:0.64,ci_high:0.96,pval:'0.018',status:'validated',acceptance:'restricted',restrictions:'High PD-L1 only (TC ≥ 50% or IC ≥ 10%)',rationale:'El beneficio en SG se observó únicamente en la subpoblación con alta expresión de PD-L1 (TC ≥ 50% o IC ≥ 10%).',quote:'El beneficio de atezolizumab se restringe a pacientes con expresión elevada de PD-L1 según la escala de células tumorales (TC ≥ 50%) o células inmunes (IC ≥ 10%).',quotePage:9,extractedAt:'2024-03-13 16:30',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-14 11:20',cP:0.85,cI:0.96,cC:0.93,cO:0.87}];
+
+function ab(s){if(s==='accepted')return'<span class="badge badge-green">✓ Accepted</span>';if(s==='restricted')return'<span class="badge badge-amber">⚡ Restricted</span>';if(s==='rejected')return'<span class="badge badge-red">✗ Rejected</span>';return'<span class="badge badge-gray">— Unknown</span>';}
+function sb(s){if(s==='validated')return'<span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span>';if(s==='draft')return'<span class="badge badge-amber"><span class="status-dot status-draft"></span>Draft</span>';return'';}
+function cc(v){return v>=0.9?'conf-high':v>=0.7?'conf-med':'conf-low';}
+function fl(c){return{AEMPS:'🇪🇸',NICE:'🇬🇧','G-BA':'🇩🇪'}[c]||'';}
+
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  const t={browse:['Evidence Browser','12 evidence units · 3 agencies'],gap:['Gap Analysis','Cross-country evidence gaps'],ingest:['Document Ingest','7 documents · 6 processed'],detail:['Evidence Detail','PICO + Provenance']};
+  document.getElementById('screen-'+n).classList.add('active');
+  document.getElementById('header-title').textContent=t[n][0];
+  document.getElementById('header-sub').textContent=t[n][1];
+  const m={browse:1,gap:2,ingest:0};
+  if(m[n]!==undefined)document.querySelectorAll('.nav-item')[m[n]].classList.add('active');
+}
+
+function showDetail(id){
+  const eu=EU.find(e=>e.id===id);if(!eu)return;
+  document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:18px;font-weight:500;color:var(--text);margin-bottom:6px">${eu.drug} · ${eu.indication}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="agency-tag">${eu.flag} ${eu.agency}</div>
+          <span class="mono" style="color:var(--text3)">${eu.docRef}</span>
+          ${sb(eu.status)} ${ab(eu.acceptance)}
+        </div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-card-header">Population <span><span class="conf-dot ${cc(eu.cP)}"></span> ${Math.round(eu.cP*100)}% confidence</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Definition</span><span class="detail-field-value">${eu.population}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Biomarker</span><span class="detail-field-value" style="color:var(--amber)">${eu.biomarker}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Line</span><span class="detail-field-value">${eu.lot}</span></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Intervention <span><span class="conf-dot ${cc(eu.cI)}"></span> ${Math.round(eu.cI*100)}% confidence</span></div>
+        <div class="detail-card-body"><div class="detail-field"><span class="detail-field-label">Drug + regimen</span><span class="detail-field-value">${eu.intervention}</span></div></div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Comparator <span><span class="conf-dot ${cc(eu.cC)}"></span> ${Math.round(eu.cC*100)}% confidence</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Comparator</span><span class="detail-field-value">${eu.comparator}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Type</span><span class="detail-field-value">${eu.comparatorType.replace('_',' ')}</span></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Primary Outcome (OS) <span><span class="conf-dot ${cc(eu.cO)}"></span> ${Math.round(eu.cO*100)}% confidence</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Hazard ratio</span><span class="detail-field-value"><span class="hr-value">${eu.hr}</span> <span class="ci-value">[${eu.ci_low}–${eu.ci_high}]</span></span></div>
+          <div class="detail-field"><span class="detail-field-label">p-value</span><span class="detail-field-value mono">${eu.pval}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="acceptance-panel">
+      <div class="full-card-header">◎ Agency acceptance</div>
+      <div class="acceptance-row">
+        <div class="acceptance-agency"><div class="agency-tag">${eu.flag} ${eu.agency}</div></div>
+        <div class="acceptance-status-cell">${ab(eu.acceptance)}</div>
+        <div class="acceptance-detail">${eu.restrictions?`<span class="restriction-tag">⚡ ${eu.restrictions}</span><br><br>`:''}${eu.rationale}</div>
+      </div>
+    </div>
+    <div class="full-card">
+      <div class="full-card-header">↗ Provenance & audit trail</div>
+      <div class="prov-timeline">
+        <div class="prov-item"><div class="prov-dot" style="background:var(--accent)"></div><div><div class="prov-action">Extracted by LLM</div><div class="prov-meta">${eu.model} · ${eu.extractedAt}</div><div class="prov-quote">"${eu.quote}" <span style="color:var(--text3)">— p.${eu.quotePage}</span></div></div></div>
+        ${eu.validatedBy?`<div class="prov-item"><div class="prov-dot" style="background:var(--green)"></div><div><div class="prov-action">Validated by human reviewer</div><div class="prov-meta">${eu.validatedBy} · ${eu.validatedAt}</div></div></div>`:`<div class="prov-item"><div class="prov-dot" style="background:var(--amber)"></div><div><div class="prov-action">Awaiting human validation</div><div class="prov-meta">No reviewer assigned yet</div></div></div>`}
+      </div>
+    </div>`;
+  showScreen('detail');
+}
+
+function renderBrowse(){
+  document.getElementById('browse-body').innerHTML=EU.map(eu=>`
+    <tr onclick="showDetail('${eu.id}')">
+      <td><div class="drug-chip">${eu.drug}</div><div class="indication-chip">${eu.indication}</div></td>
+      <td><div class="agency-tag">${eu.flag} ${eu.agency}</div></td>
+      <td style="max-width:220px"><div style="font-size:11px;color:var(--text2);line-height:1.4">${eu.population}</div>${eu.biomarker!=='No biomarker restriction'?`<span class="badge badge-amber" style="margin-top:4px;font-size:9px">${eu.biomarker}</span>`:''}</td>
+      <td style="font-size:11px;color:var(--text2)">${eu.comparator.split(' ').slice(0,3).join(' ')}...</td>
+      <td><span class="hr-value">${eu.hr}</span> <span class="ci-value">[${eu.ci_low}–${eu.ci_high}]</span></td>
+      <td>${ab(eu.acceptance)}</td>
+      <td><button class="btn btn-ghost btn-sm">View →</button></td>
+    </tr>`).join('');
+}
+
+function runGapAnalysis(){
+  const src=document.getElementById('gap-source').value;
+  const tgt=document.getElementById('gap-target').value;
+  const drug=document.getElementById('gap-drug').value;
+  if(src===tgt){document.getElementById('gap-results-area').innerHTML='<div class="gap-message">Select two different agencies.</div>';return;}
+  const srcAcc=EU.filter(e=>e.agency===src&&(e.acceptance==='accepted'||e.acceptance==='restricted')&&(!drug||e.inn===drug));
+  const tgtKeys=new Set(EU.filter(e=>e.agency===tgt&&(e.acceptance==='accepted'||e.acceptance==='restricted')).map(e=>e.inn+'-'+e.indication));
+  const gaps=srcAcc.filter(e=>!tgtKeys.has(e.inn+'-'+e.indication));
+  const both=srcAcc.filter(e=>tgtKeys.has(e.inn+'-'+e.indication));
+  document.getElementById('gap-results-area').innerHTML=`
+    <div class="gap-message">Evidence accepted by <strong>${fl(src)} ${src}</strong> not yet evaluated by <strong>${fl(tgt)} ${tgt}</strong>. <strong>${gaps.length} gap${gaps.length!==1?'s':''}</strong> found · ${both.length} already in common.</div>
+    <div class="gap-results">
+      <div>
+        <div class="gap-column-header">${fl(src)} ${src} accepted — not in ${tgt} <span class="gap-count">${gaps.length}</span></div>
+        <div class="gap-cards">${gaps.length===0?'<div class="empty-state" style="padding:30px"><div style="font-size:12px;color:var(--text3)">No gaps for this combination</div></div>':gaps.map(e=>`<div class="gap-card" onclick="showDetail('${e.id}')"><div class="gap-card-title">${e.drug} · ${e.indication}</div><div class="gap-card-meta">${ab(e.acceptance)}<div class="gap-stat">OS HR <span>${e.hr} [${e.ci_low}–${e.ci_high}]</span></div></div><div style="font-size:11px;color:var(--text3);margin-bottom:6px">${e.population}</div>${e.restrictions?`<span class="restriction-tag">⚡ ${e.restrictions}</span>`:''}<div class="gap-rationale">${e.rationale.substring(0,130)}...</div></div>`).join('')}</div>
+      </div>
+      <div>
+        <div class="gap-column-header">Already evaluated by both <span class="gap-count">${both.length}</span></div>
+        <div class="gap-cards">${both.length===0?'<div class="empty-state" style="padding:30px"><div style="font-size:12px;color:var(--text3)">No common evaluations yet</div></div>':both.map(e=>`<div class="gap-card" onclick="showDetail('${e.id}')"><div class="gap-card-title">${e.drug} · ${e.indication}</div><div class="gap-card-meta"><div class="agency-tag" style="font-size:10px">${fl(src)} ${src}</div>${ab(e.acceptance)}<div class="gap-stat">HR <span>${e.hr}</span></div></div><div style="font-size:11px;color:var(--text3)">${e.population}</div></div>`).join('')}</div>
+      </div>
+    </div>`;
+}
+
+renderBrowse();
+</script>
+</body>
+</html>
