@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verum — HTA Evidence Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #111318;
+  --ink2: #3d4351;
+  --ink3: #7a8294;
+  --paper: #fafaf8;
+  --paper2: #f2f2ef;
+  --paper3: #e8e8e4;
+  --accent: #1a3faa;
+  --accent-light: #eef2ff;
+  --green: #166534;
+  --green-bg: #f0fdf4;
+  --amber: #92400e;
+  --amber-bg: #fffbeb;
+  --red: #991b1b;
+  --red-bg: #fef2f2;
+  --hero-bg: #0e1117;
+  --hero-surface: #161a24;
+  --hero-border: #272d3d;
+  --hero-text: #e4e8f0;
+  --hero-text2: #7a8499;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); overflow-x: hidden; }
+
+/* ── HERO ── */
+.hero {
+  background: var(--hero-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* grid lines texture */
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+/* accent glow */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse at center, rgba(26,63,170,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-nav {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 60px;
+  border-bottom: 1px solid var(--hero-border);
+}
+.hero-wordmark {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px; font-weight: 500;
+  letter-spacing: .12em;
+  color: var(--hero-text);
+}
+.hero-wordmark span {
+  color: var(--hero-text2);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-left: 16px;
+}
+.hero-nav-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--hero-text2);
+  border: 1px solid var(--hero-border);
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: .08em;
+}
+
+.hero-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 60px 60px;
+  position: relative; z-index: 2;
+  text-align: center;
+}
+
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--hero-text2);
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--hero-border);
+}
+
+.hero-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(42px, 6vw, 80px);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -.02em;
+  color: var(--hero-text);
+  margin-bottom: 28px;
+  max-width: 900px;
+}
+.hero-title em {
+  font-style: italic;
+  color: #8ba4f8;
+}
+
+.hero-sub {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--hero-text2);
+  max-width: 560px;
+  margin-bottom: 48px;
+  font-weight: 300;
+}
+
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--accent);
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500;
+  padding: 14px 28px;
+  border-radius: 8px;
+  border: none; cursor: pointer;
+  transition: all .15s;
+  box-shadow: 0 4px 24px rgba(26,63,170,.4);
+  text-decoration: none;
+}
+.hero-cta:hover {
+  background: #1e4dd4;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 32px rgba(26,63,170,.5);
+}
+.hero-cta-arrow { font-size: 16px; transition: transform .15s; }
+.hero-cta:hover .hero-cta-arrow { transform: translateX(3px); }
+
+.hero-note {
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--hero-text2);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .04em;
+}
+
+/* metric strip */
+.hero-metrics {
+  position: relative; z-index: 2;
+  display: flex;
+  border-top: 1px solid var(--hero-border);
+  padding: 0 60px;
+}
+.hero-metric {
+  flex: 1;
+  padding: 24px 0;
+  border-right: 1px solid var(--hero-border);
+  text-align: center;
+}
+.hero-metric:last-child { border-right: none; }
+.hero-metric-value {
+  font-family: 'Fraunces', serif;
+  font-size: 32px; font-weight: 300;
+  color: var(--hero-text);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.hero-metric-label {
+  font-size: 11px;
+  color: var(--hero-text2);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .06em;
+}
+
+/* ── PROBLEM SECTION ── */
+.section { padding: 100px 60px; max-width: 1100px; margin: 0 auto; }
+.section-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink3);
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(30px, 4vw, 48px);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+.section-title em { font-style: italic; color: var(--accent); }
+.section-body {
+  font-size: 16px; line-height: 1.75;
+  color: var(--ink2);
+  max-width: 640px;
+  font-weight: 300;
+}
+
+/* problem cards */
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--paper3);
+  border: 1px solid var(--paper3);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 60px;
+}
+.problem-card {
+  background: var(--paper);
+  padding: 32px 28px;
+}
+.problem-number {
+  font-family: 'Fraunces', serif;
+  font-size: 48px; font-weight: 300;
+  color: var(--paper3);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.problem-title {
+  font-size: 15px; font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.problem-body {
+  font-size: 13px; line-height: 1.65;
+  color: var(--ink3);
+  font-weight: 300;
+}
+
+/* ── HOW IT WORKS ── */
+.how-section {
+  background: var(--hero-bg);
+  padding: 100px 60px;
+  position: relative;
+  overflow: hidden;
+}
+.how-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.how-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: var(--hero-border);
+  border: 1px solid var(--hero-border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 60px;
+}
+.how-step {
+  background: var(--hero-surface);
+  padding: 32px 24px;
+  position: relative;
+}
+.how-step-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: var(--accent);
+  letter-spacing: .1em;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.how-step-num::after {
+  content: '';
+  height: 1px; flex: 1;
+  background: var(--hero-border);
+}
+.how-step-icon { font-size: 24px; margin-bottom: 14px; line-height: 1; }
+.how-step-title {
+  font-size: 14px; font-weight: 600;
+  color: var(--hero-text);
+  margin-bottom: 10px;
+}
+.how-step-body {
+  font-size: 12px; line-height: 1.65;
+  color: var(--hero-text2);
+  font-weight: 300;
+}
+
+/* ── USE CASES ── */
+.use-section { background: var(--paper2); }
+.use-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 60px;
+}
+.use-card {
+  background: var(--paper);
+  border: 1px solid var(--paper3);
+  border-radius: 12px;
+  padding: 28px 24px;
+  transition: box-shadow .15s, transform .15s;
+}
+.use-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,.08);
+  transform: translateY(-2px);
+}
+.use-card-stage {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+.stage-ph3 { background: #eef2ff; color: #1a3faa; }
+.stage-launch { background: #f0fdf4; color: #166534; }
+.stage-dossier { background: #faf5ff; color: #6b21a8; }
+.stage-newind { background: #fffbeb; color: #92400e; }
+.stage-intel { background: #ecfeff; color: #0e7490; }
+.use-card-title {
+  font-size: 14px; font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.use-card-body {
+  font-size: 12px; line-height: 1.65;
+  color: var(--ink3);
+  font-weight: 300;
+  margin-bottom: 14px;
+}
+.use-card-user {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; color: var(--ink3);
+  letter-spacing: .06em;
+}
+
+/* ── CORPUS CALLOUT ── */
+.corpus-section {
+  background: var(--paper);
+  border-top: 1px solid var(--paper3);
+  border-bottom: 1px solid var(--paper3);
+}
+.corpus-inner {
+  max-width: 1100px; margin: 0 auto;
+  padding: 80px 60px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.corpus-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: var(--paper3);
+  border: 1px solid var(--paper3);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.corpus-stat-cell {
+  background: var(--paper);
+  padding: 24px;
+}
+.corpus-stat-value {
+  font-family: 'Fraunces', serif;
+  font-size: 36px; font-weight: 300;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.corpus-stat-label {
+  font-size: 11px; color: var(--ink3);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .06em;
+}
+
+/* ── HONESTY SECTION ── */
+.honesty-section {
+  background: var(--paper2);
+  padding: 80px 60px;
+}
+.honesty-inner {
+  max-width: 700px; margin: 0 auto;
+  text-align: center;
+}
+.honesty-title {
+  font-family: 'Fraunces', serif;
+  font-size: 28px; font-weight: 300;
+  line-height: 1.3; letter-spacing: -.01em;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+.honesty-body {
+  font-size: 15px; line-height: 1.75;
+  color: var(--ink2); font-weight: 300;
+  margin-bottom: 36px;
+}
+.honesty-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--paper);
+  border: 1px solid var(--paper3);
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 12px; color: var(--ink2);
+  font-family: 'DM Mono', monospace;
+}
+.honesty-pill-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+/* ── FINAL CTA ── */
+.final-cta-section {
+  background: var(--hero-bg);
+  padding: 100px 60px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.final-cta-section::after {
+  content: '';
+  position: absolute;
+  bottom: -100px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse at center, rgba(26,63,170,.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.final-cta-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 300;
+  color: var(--hero-text);
+  line-height: 1.2;
+  letter-spacing: -.02em;
+  margin-bottom: 20px;
+  position: relative; z-index: 1;
+}
+.final-cta-sub {
+  font-size: 15px; color: var(--hero-text2);
+  max-width: 480px; margin: 0 auto 40px;
+  line-height: 1.65; font-weight: 300;
+  position: relative; z-index: 1;
+}
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,12,18,.85);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal-container {
+  background: white;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 1400px;
+  height: calc(100vh - 48px);
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+  animation: modalIn .2s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+}
+.modal-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; color: #6b7280;
+  letter-spacing: .06em;
+}
+.modal-close {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s;
+}
+.modal-close:hover { background: #d1d5db; }
+.modal-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--hero-bg);
+  border-top: 1px solid var(--hero-border);
+  padding: 28px 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-mark {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px; color: var(--hero-text2);
+  letter-spacing: .1em;
+}
+.footer-note {
+  font-size: 11px; color: var(--hero-text2);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── ANIMATIONS ── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <nav class="hero-nav">
+    <div>
+      <span class="hero-wordmark">verum <span>HTA Evidence Intelligence</span></span>
+    </div>
+    <span class="hero-nav-tag">Concept · May 2026</span>
+  </nav>
+
+  <div class="hero-body">
+    <div class="hero-eyebrow">HTA · HEOR · Market Access</div>
+    <h1 class="hero-title">
+      Every HTA decision is a<br><em>reverse-engineered study protocol.</em><br>Nobody has read them all at once.
+    </h1>
+    <p class="hero-sub">
+      Verum mines published HTA decisions across EU agencies, extracts the PICO specifications they actually accepted, and shows you — before you lock the protocol — what evidence satisfies all your target markets simultaneously.
+    </p>
+    <button class="hero-cta" onclick="window.open('verum_prototype.html','_blank')">
+      Explore the prototype <span class="hero-cta-arrow">→</span>
+    </button>
+    <p class="hero-note">Interactive demo · Pembrolizumab NSCLC · Real HTA data</p>
+  </div>
+
+  <div class="hero-metrics">
+    <div class="hero-metric">
+      <div class="hero-metric-value">550+</div>
+      <div class="hero-metric-label">IPTs published by AEMPS</div>
+    </div>
+    <div class="hero-metric">
+      <div class="hero-metric-value">125</div>
+      <div class="hero-metric-label">New Spanish IPTs in 2024</div>
+    </div>
+    <div class="hero-metric">
+      <div class="hero-metric-value">2,500+</div>
+      <div class="hero-metric-label">EU HTA decisions publicly available</div>
+    </div>
+    <div class="hero-metric">
+      <div class="hero-metric-value">0</div>
+      <div class="hero-metric-label">Structured as a queryable database</div>
+    </div>
+    <div class="hero-metric">
+      <div class="hero-metric-value">100</div>
+      <div class="hero-metric-label">Days from JCA scope to dossier deadline</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<div style="max-width:1100px;margin:0 auto">
+<section class="section fade-up">
+  <div class="section-eyebrow">The problem</div>
+  <h2 class="section-title">The evidence exists.<br><em>The intelligence doesn't.</em></h2>
+  <p class="section-body">
+    Pharma companies run the trials. They have the data. The problem is that AEMPS, NICE, G-BA, and HAS each ask a slightly different question about that same evidence — and each question changes depending on what they've accepted for similar drugs before. Nobody has structured that institutional memory.
+  </p>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-number">01</div>
+      <div class="problem-title">Wrong comparator, wrong country</div>
+      <div class="problem-body">G-BA uses platinum-pemetrexed as the standard of care for non-squamous NSCLC. AEMPS and NICE accept platinum-based chemotherapy. A single-arm trial comparing against one SoC will fail AMNOG assessment regardless of OS results.</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-number">02</div>
+      <div class="problem-title">Biomarker fragmentation</div>
+      <div class="problem-body">AEMPS accepted PD-L1 CPS ≥ 10. NICE and G-BA require TPS ≥ 50%. Different assays, different thresholds, different eligible populations. Without both pre-specified in Phase III, you cannot satisfy all three markets.</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-number">03</div>
+      <div class="problem-title">100 days after JCA scope</div>
+      <div class="problem-body">Since January 2025, oncology products must complete a Joint Clinical Assessment. The EU scope document — defining what evidence is needed — arrives only 100 days before the dossier deadline. Preparation must start years earlier.</div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section fade-up">
+  <div class="how-inner">
+    <div class="section-eyebrow" style="color:var(--hero-text2)">How it works</div>
+    <h2 class="section-title" style="color:var(--hero-text)">Three steps from<br><em style="color:#8ba4f8">decision to intelligence</em></h2>
+
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">01</div>
+        <div class="how-step-icon">📄</div>
+        <div class="how-step-title">Mine decisions</div>
+        <div class="how-step-body">Every published HTA decision — Spanish IPTs, NICE STAs, G-BA dossiers, HAS decisions — is ingested and parsed. LLM extraction pulls the implicit PICO from each document, always linked to the source paragraph.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">02</div>
+        <div class="how-step-icon">◈</div>
+        <div class="how-step-title">Structure evidence</div>
+        <div class="how-step-body">Extractions are validated by a human reviewer before being committed to the database. Every EvidenceUnit is versioned, auditable, and traceable — not a summarisation, a structured data object with a complete audit trail.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">03</div>
+        <div class="how-step-icon">△</div>
+        <div class="how-step-title">Map divergences</div>
+        <div class="how-step-body">Cross-country PICO matrix showing where agencies align and where they diverge — for population, biomarker, comparator, endpoint, and study design. Including JCA consolidated scope as European reference layer.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">04</div>
+        <div class="how-step-icon">→</div>
+        <div class="how-step-title">Recommend action</div>
+        <div class="how-step-body">Strategic recommendations calibrated to your stage — Phase II→III study design, pre-launch sequencing, dossier preparation, new indication planning, or competitive intelligence. The analysis tells you what to do next.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<div style="background:var(--paper2)">
+<div style="max-width:1100px;margin:0 auto">
+<section class="section fade-up" style="background:var(--paper2)">
+  <div class="section-eyebrow">Who it's for</div>
+  <h2 class="section-title">Five moments where<br><em>this changes the decision</em></h2>
+
+  <div class="use-grid">
+    <div class="use-card">
+      <div class="use-card-stage stage-ph3">🔬 Phase II → III</div>
+      <div class="use-card-title">Lock the right protocol</div>
+      <div class="use-card-body">Which comparator satisfies all target markets? Which endpoints must be co-powered? Which biomarker thresholds need dual assays? Answer these before the protocol is frozen — not after the trial is running.</div>
+      <div class="use-card-user">HEOR · Clinical Development</div>
+    </div>
+    <div class="use-card">
+      <div class="use-card-stage stage-launch">🚀 Pre-launch</div>
+      <div class="use-card-title">Sequence markets by evidence</div>
+      <div class="use-card-body">Where does current evidence give you immediate access? Where do you have gaps that block submission? Launch where you can, generate evidence for where you can't. Stop guessing at market size in countries you haven't modelled.</div>
+      <div class="use-card-user">Market Access · HEOR</div>
+    </div>
+    <div class="use-card">
+      <div class="use-card-stage stage-dossier">📋 Dossier preparation</div>
+      <div class="use-card-title">Write what each agency expects</div>
+      <div class="use-card-body">AEMPS, NICE, and G-BA each have a decade of precedents that define what they find convincing. The same evidence package submitted to all three is the most common avoidable cause of restriction or rejection.</div>
+      <div class="use-card-user">Regulatory Affairs · HEOR</div>
+    </div>
+    <div class="use-card">
+      <div class="use-card-stage stage-newind">↗ New indication</div>
+      <div class="use-card-title">Reuse before you commission</div>
+      <div class="use-card-body">Which evidence from the parent indication carries over? Which comparators have been accepted for adjacent indications? Before committing to a new Phase III, know what the database already answers.</div>
+      <div class="use-card-user">Clinical Development · HEOR</div>
+    </div>
+    <div class="use-card">
+      <div class="use-card-stage stage-intel">📡 Market intelligence</div>
+      <div class="use-card-title">Track agency signals continuously</div>
+      <div class="use-card-body">Every competitor HTA decision reveals the current state of what agencies accept. Monitor PICO shifts, comparator drift, and JCA delta vs. national decisions as the corpus updates. Know before your competitor does.</div>
+      <div class="use-card-user">Market Access · Strategy</div>
+    </div>
+  </div>
+</section>
+</div>
+</div>
+
+<!-- CORPUS -->
+<section class="corpus-section fade-up">
+  <div class="corpus-inner">
+    <div>
+      <div class="section-eyebrow">The corpus</div>
+      <h2 class="section-title" style="font-size:32px">Public, structured,<br><em>never aggregated before</em></h2>
+      <p class="section-body" style="font-size:14px;margin-top:16px">
+        Every document Verum mines is publicly available. AEMPS publishes every IPT. NICE publishes every STA. G-BA and HAS publish their decisions. The EU Commission publishes every JCA scope document.
+        <br><br>
+        The information has always been there. Nobody has extracted it, structured it, and made it queryable across countries and indications — until now.
+      </p>
+    </div>
+    <div class="corpus-stat-grid">
+      <div class="corpus-stat-cell">
+        <div class="corpus-stat-value">550+</div>
+        <div class="corpus-stat-label">AEMPS IPTs total</div>
+      </div>
+      <div class="corpus-stat-cell">
+        <div class="corpus-stat-value">125</div>
+        <div class="corpus-stat-label">New IPTs in 2024</div>
+      </div>
+      <div class="corpus-stat-cell">
+        <div class="corpus-stat-value">60</div>
+        <div class="corpus-stat-label">Oncology IPTs in 2024</div>
+      </div>
+      <div class="corpus-stat-cell">
+        <div class="corpus-stat-value">2,500+</div>
+        <div class="corpus-stat-label">EU decisions available</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HONESTY -->
+<section class="honesty-section fade-up">
+  <div class="honesty-inner">
+    <h2 class="honesty-title">A note on what this is — and isn't</h2>
+    <p class="honesty-body">
+      Verum is a validated concept with a working prototype seeded with real HTA data for PD-1/PD-L1 inhibitors in NSCLC. It is not a production product and has no paying customers yet.
+      <br><br>
+      The architecture is designed. The data model is built. The gap that Verum fills is real — no platform structures and cross-references EU HTA PICO specifications at scale. This prototype exists to validate whether that problem is urgent enough to build for.
+    </p>
+    <div class="honesty-pill">
+      <div class="honesty-pill-dot"></div>
+      Concept in validation · May 2026 · Not for commercial use
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta-section fade-up">
+  <h2 class="final-cta-title">See it in action.<br>Two minutes, real data.</h2>
+  <p class="final-cta-sub">The prototype shows the full four-step workflow with real decisions from AEMPS, NICE, and G-BA for pembrolizumab in NSCLC.</p>
+  <button class="hero-cta" onclick="window.open('verum_prototype.html','_blank')" style="position:relative;z-index:1">
+    Open the prototype <span class="hero-cta-arrow">→</span>
+  </button>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-mark">verum</span>
+  <span class="footer-note">Concept prototype · May 2026 · Not for distribution</span>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
+</script>
+</body>
+</html>
+`;
+
+function openModal() {
+  const modal = document.getElementById('modal');
+  const iframe = document.getElementById('proto-iframe');
+  if (!iframe.srcdoc) {
+    iframe.srcdoc = PROTOTYPE_HTML;
+  }
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ── SCROLL ANIMATIONS ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

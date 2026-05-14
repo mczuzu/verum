@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verum — HTA Evidence Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ══ VIEWS ══ */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ══ LANDING ══ */
+:root {
+  --ink: #111318; --ink2: #3d4351; --ink3: #7a8294;
+  --paper: #fafaf8; --paper2: #f2f2ef; --paper3: #e8e8e4;
+  --hero-bg: #0e1117; --hero-surface: #161a24; --hero-border: #272d3d;
+  --hero-text: #e4e8f0; --hero-text2: #7a8499;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+#view-landing {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+.hero {
+  background: var(--hero-bg);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 48px 48px; pointer-events: none;
+}
+.hero::after {
+  content: ''; position: absolute; top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse at center, rgba(26,63,170,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-nav {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 60px;
+  border-bottom: 1px solid var(--hero-border);
+}
+.hero-wordmark {
+  font-family: 'DM Mono', monospace;
+  font-size: 16px; font-weight: 500; letter-spacing: .12em; color: var(--hero-text);
+}
+.hero-wordmark span {
+  color: var(--hero-text2); font-size: 11px; font-weight: 400;
+  letter-spacing: .1em; text-transform: uppercase; margin-left: 16px;
+}
+.hero-nav-tag {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--hero-text2); border: 1px solid var(--hero-border);
+  padding: 4px 12px; border-radius: 20px; letter-spacing: .08em;
+}
+.hero-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 60px 60px;
+  position: relative; z-index: 2; text-align: center;
+}
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--hero-text2); margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; width: 32px; height: 1px; background: var(--hero-border);
+}
+.hero-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(42px, 6vw, 76px); font-weight: 300;
+  line-height: 1.08; letter-spacing: -.02em; color: var(--hero-text);
+  margin-bottom: 28px; max-width: 900px;
+}
+.hero-title em { font-style: italic; color: #8ba4f8; }
+.hero-sub {
+  font-size: 17px; line-height: 1.65; color: var(--hero-text2);
+  max-width: 560px; margin-bottom: 48px; font-weight: 300;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #1a3faa; color: white;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+  padding: 15px 32px; border-radius: 8px;
+  border: none; cursor: pointer; transition: all .15s;
+  box-shadow: 0 4px 24px rgba(26,63,170,.4);
+}
+.hero-cta:hover { background: #1e4dd4; transform: translateY(-1px); box-shadow: 0 6px 32px rgba(26,63,170,.5); }
+.hero-cta-arrow { font-size: 16px; transition: transform .15s; }
+.hero-cta:hover .hero-cta-arrow { transform: translateX(3px); }
+.hero-note { margin-top: 16px; font-size: 11px; color: var(--hero-text2); font-family: 'DM Mono', monospace; letter-spacing: .04em; }
+.hero-metrics {
+  position: relative; z-index: 2;
+  display: flex; border-top: 1px solid var(--hero-border); padding: 0 60px;
+}
+.hero-metric { flex: 1; padding: 24px 0; border-right: 1px solid var(--hero-border); text-align: center; }
+.hero-metric:last-child { border-right: none; }
+.hero-metric-value { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 300; color: var(--hero-text); line-height: 1; margin-bottom: 6px; }
+.hero-metric-label { font-size: 11px; color: var(--hero-text2); font-family: 'DM Mono', monospace; letter-spacing: .06em; }
+
+.l-section { padding: 90px 60px; max-width: 1100px; margin: 0 auto; }
+.l-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); margin-bottom: 16px; }
+.l-title { font-family: 'Fraunces', Georgia, serif; font-size: clamp(28px, 4vw, 46px); font-weight: 300; line-height: 1.15; letter-spacing: -.02em; color: var(--ink); margin-bottom: 20px; }
+.l-title em { font-style: italic; color: #1a3faa; }
+.l-body { font-size: 15px; line-height: 1.75; color: var(--ink2); max-width: 620px; font-weight: 300; }
+
+.problem-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; background: var(--paper3); border: 1px solid var(--paper3); border-radius: 12px; overflow: hidden; margin-top: 52px; }
+.problem-card { background: var(--paper); padding: 30px 26px; }
+.problem-number { font-family: 'Fraunces', serif; font-size: 44px; font-weight: 300; color: var(--paper3); line-height: 1; margin-bottom: 14px; }
+.problem-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+.problem-body { font-size: 12px; line-height: 1.65; color: var(--ink3); font-weight: 300; }
+
+.how-section { background: var(--hero-bg); padding: 90px 60px; position: relative; overflow: hidden; }
+.how-section::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px); background-size: 48px 48px; }
+.how-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+.how-steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; background: var(--hero-border); border: 1px solid var(--hero-border); border-radius: 12px; overflow: hidden; margin-top: 52px; }
+.how-step { background: var(--hero-surface); padding: 28px 22px; }
+.how-step-num { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: #1a3faa; letter-spacing: .1em; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.how-step-num::after { content: ''; height: 1px; flex: 1; background: var(--hero-border); }
+.how-step-icon { font-size: 22px; margin-bottom: 12px; }
+.how-step-title { font-size: 13px; font-weight: 600; color: var(--hero-text); margin-bottom: 8px; }
+.how-step-body { font-size: 12px; line-height: 1.65; color: var(--hero-text2); font-weight: 300; }
+
+.use-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 52px; }
+.use-card { background: var(--paper); border: 1px solid var(--paper3); border-radius: 10px; padding: 24px 22px; transition: box-shadow .15s, transform .15s; }
+.use-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,.07); transform: translateY(-2px); }
+.use-card-stage { display: inline-flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 14px; }
+.s-ph3{background:#eef2ff;color:#1a3faa} .s-launch{background:#f0fdf4;color:#166534} .s-dossier{background:#faf5ff;color:#6b21a8} .s-newind{background:#fffbeb;color:#92400e} .s-intel{background:#ecfeff;color:#0e7490}
+.use-card-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 7px; }
+.use-card-body { font-size: 12px; line-height: 1.65; color: var(--ink3); font-weight: 300; margin-bottom: 12px; }
+.use-card-user { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink3); letter-spacing: .04em; }
+
+.corpus-inner { max-width: 1100px; margin: 0 auto; padding: 80px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; border-top: 1px solid var(--paper3); border-bottom: 1px solid var(--paper3); }
+.corpus-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--paper3); border: 1px solid var(--paper3); border-radius: 10px; overflow: hidden; }
+.corpus-stat-cell { background: var(--paper); padding: 22px; }
+.corpus-stat-value { font-family: 'Fraunces', serif; font-size: 34px; font-weight: 300; color: var(--ink); line-height: 1; margin-bottom: 5px; }
+.corpus-stat-label { font-size: 11px; color: var(--ink3); font-family: 'DM Mono', monospace; letter-spacing: .05em; }
+
+.honesty-section { background: var(--paper2); padding: 80px 60px; }
+.honesty-inner { max-width: 680px; margin: 0 auto; text-align: center; }
+.honesty-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 300; line-height: 1.3; letter-spacing: -.01em; color: var(--ink); margin-bottom: 18px; }
+.honesty-body { font-size: 14px; line-height: 1.75; color: var(--ink2); font-weight: 300; margin-bottom: 28px; }
+.honesty-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--paper); border: 1px solid var(--paper3); border-radius: 8px; padding: 10px 18px; font-size: 11px; color: var(--ink2); font-family: 'DM Mono', monospace; }
+.honesty-pill-dot { width: 7px; height: 7px; border-radius: 50%; background: #92400e; }
+
+.final-cta-section { background: var(--hero-bg); padding: 100px 60px; text-align: center; position: relative; overflow: hidden; }
+.final-cta-section::after { content: ''; position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%); width: 600px; height: 400px; background: radial-gradient(ellipse at center, rgba(26,63,170,.15) 0%, transparent 70%); pointer-events: none; }
+.final-cta-title { font-family: 'Fraunces', serif; font-size: clamp(26px, 4vw, 44px); font-weight: 300; color: var(--hero-text); line-height: 1.2; letter-spacing: -.02em; margin-bottom: 18px; position: relative; z-index: 1; }
+.final-cta-sub { font-size: 14px; color: var(--hero-text2); max-width: 460px; margin: 0 auto 36px; line-height: 1.65; font-weight: 300; position: relative; z-index: 1; }
+
+.l-footer { background: var(--hero-bg); border-top: 1px solid var(--hero-border); padding: 26px 60px; display: flex; align-items: center; justify-content: space-between; }
+.l-footer-mark { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--hero-text2); letter-spacing: .1em; }
+.l-footer-note { font-size: 11px; color: var(--hero-text2); font-family: 'DM Mono', monospace; }
+
+.fade-up { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s ease; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* back button for app view */
+.app-back-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  background: #f0f2f5; border-bottom: 1px solid #e2e6ed;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; color: #4a5568;
+}
+.app-back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: white; border: 1px solid #e2e6ed;
+  border-radius: 6px; padding: 5px 12px;
+  font-size: 12px; cursor: pointer; color: #1a3faa;
+  font-family: 'DM Sans', sans-serif; font-weight: 500;
+  transition: background .12s;
+}
+.app-back-btn:hover { background: #eef2ff; }
+#view-app { padding-top: 40px; }
+
+/* ══ PROTOTYPE CSS ══ */
+
+:root{
+  --bg:#f5f6f8;
+  --surface:#ffffff;
+  --surface2:#f0f2f5;
+  --border:#e2e6ed;
+  --border2:#c8cfd9;
+  --text:#1a1f2e;
+  --text2:#4a5568;
+  --text3:#8a94a6;
+  --accent:#2563eb;
+  --accent-light:#eff4ff;
+  --accent2:#1d4ed8;
+  --green:#16a34a;
+  --green-bg:#f0fdf4;
+  --green-border:#bbf7d0;
+  --amber:#b45309;
+  --amber-bg:#fffbeb;
+  --amber-border:#fde68a;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --red-border:#fecaca;
+  --purple:#7c3aed;
+  --purple-bg:#faf5ff;
+  --radius:6px;
+  --radius2:10px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow2:0 4px 12px rgba(0,0,0,.08);
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.5;min-height:100vh;display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{width:224px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;box-shadow:var(--shadow)}
+.logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-mark{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--text);letter-spacing:-.5px}
+.logo-sub{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.nav{padding:10px 0;flex:1}
+.nav-section{padding:14px 18px 5px;font-size:9px;font-family:var(--mono);color:var(--text3);letter-spacing:.12em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;color:var(--text2);font-size:13px;border-left:2px solid transparent;transition:all .12s}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent);font-weight:500}
+.nav-badge{margin-left:auto;background:var(--accent-light);color:var(--accent);font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:10px;font-weight:500}
+.corpus-status{padding:14px 18px;border-top:1px solid var(--border);background:var(--surface2)}
+.corpus-label{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.corpus-stat{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+.corpus-stat-label{color:var(--text3);font-size:11px}
+.corpus-stat-value{font-family:var(--mono);font-size:11px;color:var(--text);font-weight:500}
+
+/* ── MAIN ── */
+.main{margin-left:224px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:var(--shadow)}
+.header-title{font-size:14px;font-weight:600;color:var(--text)}
+.header-sub{font-size:12px;color:var(--text3);font-family:var(--mono);margin-left:10px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.btn{padding:6px 14px;border-radius:var(--radius);font-size:12px;font-family:var(--sans);font-weight:500;cursor:pointer;border:none;transition:all .12s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:white;box-shadow:0 1px 2px rgba(37,99,235,.3)}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2);background:var(--surface2)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.content{padding:24px 28px;flex:1;overflow-y:auto}
+.screen{display:none}
+.screen.active{display:block}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:16px 20px;box-shadow:var(--shadow)}
+.metric-label{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.metric-value{font-size:26px;font-family:var(--mono);font-weight:400;color:var(--text);line-height:1}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.metric-delta{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:4px;margin-top:4px}
+.delta-up{background:var(--green-bg);color:var(--green)}
+.delta-neutral{background:var(--accent-light);color:var(--accent)}
+
+/* ── TABLES ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;box-shadow:var(--shadow)}
+.table-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.table-title{font-size:13px;font-weight:600;color:var(--text)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:9px 20px;font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+td{padding:11px 20px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;color:var(--text2)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2);cursor:pointer}
+.mono{font-family:var(--mono);font-size:11px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);white-space:nowrap;font-weight:500}
+.badge-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.badge-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.badge-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.badge-blue{background:var(--accent-light);color:var(--accent);border:1px solid #bfdbfe}
+.badge-gray{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.agency-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--mono);font-size:11px;color:var(--text2)}
+.restriction-tag{display:inline-block;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);padding:2px 8px;border-radius:var(--radius);font-family:var(--mono);font-size:10px}
+
+/* ── FILTERS ── */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-label{font-size:11px;color:var(--text3);font-family:var(--mono)}
+select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;color:var(--text2);font-size:12px;font-family:var(--sans);outline:none;cursor:pointer}
+select:focus{border-color:var(--accent)}
+input[type="text"]{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;color:var(--text);font-size:12px;font-family:var(--sans);outline:none}
+input[type="text"]:focus{border-color:var(--accent)}
+input[type="text"]::placeholder{color:var(--text3)}
+
+/* ── STATUS DOTS ── */
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px}
+.status-validated{background:var(--green)}
+.status-draft{background:var(--amber)}
+.status-processing{background:var(--accent);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── INGEST ── */
+.ingest-upload{border:2px dashed var(--border2);border-radius:var(--radius2);padding:40px;text-align:center;margin-bottom:24px;cursor:pointer;transition:all .2s;background:var(--surface)}
+.ingest-upload:hover{border-color:var(--accent);background:var(--accent-light)}
+.ingest-upload-icon{font-size:28px;margin-bottom:10px;color:var(--text3)}
+.ingest-upload-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px}
+.ingest-upload-sub{font-size:12px;color:var(--text3)}
+
+/* ── DETAIL ── */
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text3);font-size:12px;cursor:pointer;margin-bottom:20px;transition:color .12s}
+.back-btn:hover{color:var(--text2)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;box-shadow:var(--shadow)}
+.detail-card-header{padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;justify-content:space-between}
+.conf-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.conf-high{background:var(--green)}
+.conf-med{background:var(--amber)}
+.conf-low{background:var(--red)}
+.detail-card-body{padding:14px 16px}
+.detail-field{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);gap:16px}
+.detail-field:last-child{border:none}
+.detail-field-label{font-size:11px;color:var(--text3);font-family:var(--mono);flex-shrink:0;min-width:100px}
+.detail-field-value{font-size:11px;color:var(--text);text-align:right;word-break:break-word}
+.hr-value{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text)}
+.ci-value{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.full-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.full-card-header{padding:11px 18px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:8px}
+.acceptance-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.acceptance-row{display:grid;grid-template-columns:140px 130px 1fr;border-bottom:1px solid var(--border);align-items:center}
+.acceptance-row:last-child{border-bottom:none}
+.acceptance-agency{padding:12px 16px;border-right:1px solid var(--border)}
+.acceptance-status-cell{padding:12px 16px;border-right:1px solid var(--border)}
+.acceptance-detail{padding:12px 16px;font-size:11px;color:var(--text2);line-height:1.5}
+.prov-timeline{padding:0 16px 16px}
+.prov-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.prov-item:last-child{border:none}
+.prov-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0}
+.prov-action{font-size:11px;color:var(--text);font-weight:500;margin-bottom:2px}
+.prov-meta{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
+.prov-quote{font-size:10px;color:var(--text2);font-style:italic;background:var(--surface2);border-left:2px solid var(--accent);padding:6px 10px;border-radius:0 var(--radius) var(--radius) 0;margin-top:6px;line-height:1.5}
+.drug-chip{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
+.indication-chip{font-size:11px;color:var(--text3);margin-top:2px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.empty-state{padding:60px 20px;text-align:center;color:var(--text3)}
+.empty-icon{font-size:28px;margin-bottom:10px}
+.empty-title{font-size:14px;color:var(--text2);margin-bottom:6px}
+
+/* ══════════════════════════════
+   GAP ANALYSIS — STEPPED WORKFLOW
+══════════════════════════════ */
+
+/* Step progress bar */
+.step-bar{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:0;margin-bottom:24px;overflow:hidden;box-shadow:var(--shadow)}
+.step-tab{flex:1;display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;border-right:1px solid var(--border);transition:all .12s;position:relative;border-bottom:3px solid transparent}
+.step-tab:last-child{border-right:none}
+.step-tab:hover:not(.locked){background:var(--surface2)}
+.step-tab.active{border-bottom-color:var(--accent);background:var(--accent-light)}
+.step-tab.done{border-bottom-color:var(--green)}
+.step-tab.locked{opacity:.4;cursor:not-allowed}
+.step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;font-family:var(--mono);flex-shrink:0;background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.step-tab.active .step-num{background:var(--accent);color:white;border-color:var(--accent)}
+.step-tab.done .step-num{background:var(--green);color:white;border-color:var(--green)}
+.step-info{display:flex;flex-direction:column;gap:2px}
+.step-name{font-size:12px;font-weight:600;color:var(--text2)}
+.step-tab.active .step-name{color:var(--accent)}
+.step-tab.done .step-name{color:var(--green)}
+.step-desc{font-size:10px;color:var(--text3)}
+.step-connector{width:20px;flex-shrink:0;color:var(--border2);text-align:center;font-size:12px}
+
+/* Step panels */
+.step-panel{display:none}
+.step-panel.active{display:block}
+
+/* Step 1 — Stage cards */
+.stage-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px}
+.stage-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius2);padding:20px 16px;cursor:pointer;text-align:center;transition:all .15s;box-shadow:var(--shadow)}
+.stage-card:hover{border-color:var(--border2);box-shadow:var(--shadow2);transform:translateY(-1px)}
+.stage-card.selected{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.stage-card-icon{font-size:28px;margin-bottom:10px;line-height:1}
+.stage-card-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+.stage-card.selected .stage-card-label{color:var(--accent)}
+.stage-card-desc{font-size:11px;color:var(--text3);line-height:1.4}
+.stage-card-users{font-size:10px;color:var(--text3);margin-top:8px;font-family:var(--mono);padding-top:8px;border-top:1px solid var(--border)}
+.stage-card.selected .stage-card-users{border-top-color:rgba(37,99,235,.2);color:var(--accent)}
+.step-next-btn{display:flex;justify-content:flex-end}
+
+/* Step 2 — Scope */
+.scope-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:20px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.scope-section{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.scope-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.scope-section-title{font-size:11px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.scope-section-num{width:18px;height:18px;border-radius:50%;background:var(--accent);color:white;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+.field-group{display:flex;flex-direction:column;gap:5px}
+.field-label{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em}
+.agency-pills{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.agency-pill{padding:6px 14px;border-radius:20px;font-size:12px;font-family:var(--mono);cursor:pointer;border:1px solid var(--border);color:var(--text3);background:var(--surface2);transition:all .12s;user-select:none;display:flex;align-items:center;gap:5px}
+.agency-pill:hover{border-color:var(--border2);color:var(--text2)}
+.agency-pill.active{background:var(--accent-light);border-color:#93c5fd;color:var(--accent);font-weight:500}
+.agency-pill.jca-pill{border-style:dashed;border-color:#93c5fd;color:var(--text3)}
+.agency-pill.jca-pill.active{background:var(--accent-light);border-style:solid;border-color:var(--accent);color:var(--accent)}
+.stage-context-note{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start}
+.step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+
+/* Step 3 — Matrix */
+.matrix-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+.matrix-header-row{display:grid;background:var(--surface2);border-bottom:2px solid var(--border)}
+.matrix-header-cell{padding:12px 16px;font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-right:1px solid var(--border)}
+.matrix-header-cell:last-child{border-right:none}
+.matrix-header-cell.agency-col{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2);font-weight:500;text-transform:none;letter-spacing:0}
+.matrix-row{display:grid;border-bottom:1px solid var(--border);transition:background .1s}
+.matrix-row:last-child{border-bottom:none}
+.matrix-row:hover{background:#fafbfc}
+.matrix-cell{padding:12px 16px;border-right:1px solid var(--border);font-size:11px;display:flex;align-items:flex-start;flex-direction:column;gap:4px}
+.matrix-cell:last-child{border-right:none}
+.matrix-cell.pico-label{color:var(--text3);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;justify-content:center;background:var(--surface2);font-weight:500}
+.cell-value{color:var(--text);line-height:1.4;font-size:12px}
+.cell-sub{color:var(--text3);font-size:10px;font-family:var(--mono)}
+.cell-match{background:var(--green-bg);border-left:3px solid var(--green)}
+.cell-diverge{background:var(--amber-bg);border-left:3px solid var(--amber)}
+.cell-gap{background:var(--red-bg);border-left:3px solid var(--red)}
+.cell-na{background:var(--surface2);color:var(--text3);font-style:italic;justify-content:center;align-items:center}
+.cell-jca{background:#eff4ff;border-left:3px solid var(--accent)}
+.diverge-flag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);margin-top:2px}
+.match-flag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);margin-top:2px}
+.gap-flag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);margin-top:2px}
+.jca-flag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:3px;background:var(--accent-light);color:var(--accent);border:1px solid #bfdbfe;margin-top:2px}
+.cell-implication{font-size:10px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 8px;margin-top:6px;line-height:1.4;font-style:italic}
+.cell-implication strong{color:var(--text);font-style:normal}
+.matrix-legend{display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.legend-dot-match{background:var(--green)}
+.legend-dot-diverge{background:var(--amber)}
+.legend-dot-gap{background:var(--red)}
+.legend-dot-jca{background:var(--accent)}
+.gap-summary-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.summary-pill{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);padding:12px 16px;display:flex;flex-direction:column;gap:3px;min-width:130px;box-shadow:var(--shadow)}
+.summary-pill-value{font-family:var(--mono);font-size:22px;font-weight:400;color:var(--text);line-height:1}
+.summary-pill-label{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.summary-pill.highlight{border-color:#93c5fd;background:var(--accent-light)}
+.summary-pill.highlight .summary-pill-value{color:var(--accent)}
+.summary-pill.warn{border-color:var(--amber-border);background:var(--amber-bg)}
+.summary-pill.warn .summary-pill-value{color:var(--amber)}
+.summary-pill.danger{border-color:var(--red-border);background:var(--red-bg)}
+.summary-pill.danger .summary-pill-value{color:var(--red)}
+.jca-banner{background:var(--accent-light);border:1px solid #bfdbfe;border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-size:11px;color:var(--accent);line-height:1.5;display:flex;align-items:center;gap:8px}
+
+/* Step 4 — Recommendation */
+.rec-panel{border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow)}
+.rec-header{padding:16px 22px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--border)}
+.rec-header-icon{font-size:20px;margin-top:2px}
+.rec-header-content{flex:1}
+.rec-header-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4}
+.rec-header-stage{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mono);padding:2px 8px;border-radius:4px;font-weight:500}
+.mcs-section{padding:20px 22px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.mcs-section-title{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.mcs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.mcs-field{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px}
+.mcs-field-label{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.mcs-field-value{font-size:11px;color:var(--text);line-height:1.4}
+.mcs-coverage{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.mcs-coverage-label{font-size:11px;color:var(--text3)}
+.coverage-agency{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-size:11px;font-family:var(--mono)}
+.coverage-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.coverage-partial{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.rec-actions{padding:20px 22px;display:flex;flex-direction:column;gap:0}
+.rec-action-label{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.rec-action-item{display:flex;align-items:flex-start;gap:12px;font-size:12px;color:var(--text2);padding:12px 0;border-bottom:1px solid var(--border);line-height:1.5}
+.rec-action-item:last-child{border:none;padding-bottom:0}
+.rec-action-num{width:22px;height:22px;border-radius:50%;background:var(--accent-light);color:var(--accent);font-size:11px;font-weight:600;font-family:var(--mono);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.rec-warning{padding:14px 22px;font-size:11px;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+.rec-warning-amber{background:var(--amber-bg);border-top:1px solid var(--amber-border);color:var(--amber)}
+.rec-warning-red{background:var(--red-bg);border-top:1px solid var(--red-border);color:var(--red)}
+
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING VIEW ══ -->
+<div id="view-landing" class="view active">
+
+  <section class="hero">
+    <nav class="hero-nav">
+      <div><span class="hero-wordmark">verum <span>HTA Evidence Intelligence</span></span></div>
+      <span class="hero-nav-tag">Concept · May 2026</span>
+    </nav>
+    <div class="hero-body">
+      <div class="hero-eyebrow">HTA · HEOR · Market Access</div>
+      <h1 class="hero-title">Every HTA decision is a<br><em>reverse-engineered study protocol.</em><br>Nobody has read them all at once.</h1>
+      <p class="hero-sub">Verum mines published HTA decisions across EU agencies, extracts the PICO specifications they actually accepted, and shows you — before you lock the protocol — what evidence satisfies all your target markets simultaneously.</p>
+      <button class="hero-cta" onclick="showView('app')">
+        Explore the prototype <span class="hero-cta-arrow">→</span>
+      </button>
+      <p class="hero-note">Interactive demo · Pembrolizumab NSCLC · Real HTA data</p>
+    </div>
+    <div class="hero-metrics">
+      <div class="hero-metric"><div class="hero-metric-value">550+</div><div class="hero-metric-label">IPTs published by AEMPS</div></div>
+      <div class="hero-metric"><div class="hero-metric-value">125</div><div class="hero-metric-label">New Spanish IPTs in 2024</div></div>
+      <div class="hero-metric"><div class="hero-metric-value">2,500+</div><div class="hero-metric-label">EU HTA decisions available</div></div>
+      <div class="hero-metric"><div class="hero-metric-value">0</div><div class="hero-metric-label">Structured as a queryable database</div></div>
+      <div class="hero-metric"><div class="hero-metric-value">100</div><div class="hero-metric-label">Days from JCA scope to deadline</div></div>
+    </div>
+  </section>
+
+  <div style="max-width:1100px;margin:0 auto">
+  <section class="l-section fade-up">
+    <div class="l-eyebrow">The problem</div>
+    <h2 class="l-title">The evidence exists.<br><em>The intelligence doesn't.</em></h2>
+    <p class="l-body">Pharma companies run the trials. They have the data. The problem is that AEMPS, NICE, G-BA, and HAS each ask a slightly different question about that same evidence — and each question changes depending on what they've accepted for similar drugs before. Nobody has structured that institutional memory.</p>
+    <div class="problem-grid">
+      <div class="problem-card"><div class="problem-number">01</div><div class="problem-title">Wrong comparator, wrong country</div><div class="problem-body">G-BA uses platinum-pemetrexed as SoC for non-squamous NSCLC. AEMPS and NICE accept platinum-based chemotherapy. A single-arm trial fails AMNOG regardless of OS results.</div></div>
+      <div class="problem-card"><div class="problem-number">02</div><div class="problem-title">Biomarker fragmentation</div><div class="problem-body">AEMPS accepted PD-L1 CPS ≥ 10. NICE and G-BA require TPS ≥ 50%. Different assays, different thresholds. Without both pre-specified in Phase III, you cannot satisfy all three markets.</div></div>
+      <div class="problem-card"><div class="problem-number">03</div><div class="problem-title">100 days after JCA scope</div><div class="problem-body">Since January 2025, oncology products face Joint Clinical Assessment. The EU scope document arrives only 100 days before the dossier deadline. Preparation must start years earlier.</div></div>
+    </div>
+  </section>
+  </div>
+
+  <section class="how-section fade-up">
+    <div class="how-inner">
+      <div class="l-eyebrow" style="color:var(--hero-text2)">How it works</div>
+      <h2 class="l-title" style="color:var(--hero-text)">Three steps from decision<br><em style="color:#8ba4f8">to intelligence</em></h2>
+      <div class="how-steps">
+        <div class="how-step"><div class="how-step-num">01</div><div class="how-step-icon">📄</div><div class="how-step-title">Mine decisions</div><div class="how-step-body">Every published HTA decision is ingested and parsed. LLM extraction pulls the implicit PICO from each document, linked to the source paragraph.</div></div>
+        <div class="how-step"><div class="how-step-num">02</div><div class="how-step-icon">◈</div><div class="how-step-title">Structure evidence</div><div class="how-step-body">Extractions are validated by a human reviewer before being committed. Every EvidenceUnit is versioned, auditable, and traceable.</div></div>
+        <div class="how-step"><div class="how-step-num">03</div><div class="how-step-icon">△</div><div class="how-step-title">Map divergences</div><div class="how-step-body">Cross-country PICO matrix showing where agencies align and diverge — including JCA consolidated scope as European reference layer.</div></div>
+        <div class="how-step"><div class="how-step-num">04</div><div class="how-step-icon">→</div><div class="how-step-title">Recommend action</div><div class="how-step-body">Strategic recommendations calibrated to your stage: Phase III design, pre-launch sequencing, dossier preparation, or competitive intelligence.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div style="background:var(--paper2)">
+  <div style="max-width:1100px;margin:0 auto">
+  <section class="l-section fade-up" style="background:var(--paper2)">
+    <div class="l-eyebrow">Who it's for</div>
+    <h2 class="l-title">Five moments where<br><em>this changes the decision</em></h2>
+    <div class="use-grid">
+      <div class="use-card"><div class="use-card-stage s-ph3">🔬 Phase II → III</div><div class="use-card-title">Lock the right protocol</div><div class="use-card-body">Which comparator satisfies all markets? Which endpoints must be co-powered? Answer before the protocol is frozen.</div><div class="use-card-user">HEOR · Clinical Development</div></div>
+      <div class="use-card"><div class="use-card-stage s-launch">🚀 Pre-launch</div><div class="use-card-title">Sequence markets by evidence</div><div class="use-card-body">Where does current evidence give you immediate access? Where do you have gaps that block submission?</div><div class="use-card-user">Market Access · HEOR</div></div>
+      <div class="use-card"><div class="use-card-stage s-dossier">📋 Dossier preparation</div><div class="use-card-title">Write what each agency expects</div><div class="use-card-body">Each agency has a decade of precedents. The same package submitted to all three is the most common avoidable cause of restriction.</div><div class="use-card-user">Regulatory Affairs · HEOR</div></div>
+      <div class="use-card"><div class="use-card-stage s-newind">↗ New indication</div><div class="use-card-title">Reuse before you commission</div><div class="use-card-body">Which evidence from the parent indication carries over? Before committing to a new Phase III, know what the database already answers.</div><div class="use-card-user">Clinical Development · HEOR</div></div>
+      <div class="use-card"><div class="use-card-stage s-intel">📡 Market intelligence</div><div class="use-card-title">Track agency signals continuously</div><div class="use-card-body">Every competitor HTA decision reveals what agencies accept right now. Monitor PICO shifts and JCA delta as the corpus updates.</div><div class="use-card-user">Market Access · Strategy</div></div>
+    </div>
+  </section>
+  </div>
+  </div>
+
+  <div class="corpus-inner fade-up">
+    <div>
+      <div class="l-eyebrow">The corpus</div>
+      <h2 class="l-title" style="font-size:30px">Public, structured,<br><em>never aggregated before</em></h2>
+      <p class="l-body" style="font-size:13px;margin-top:14px">Every document Verum mines is publicly available. AEMPS publishes every IPT. NICE publishes every STA. G-BA and HAS publish their decisions. The EU Commission publishes every JCA scope document.<br><br>The information has always been there. Nobody has structured it across countries and indications — until now.</p>
+    </div>
+    <div class="corpus-stat-grid">
+      <div class="corpus-stat-cell"><div class="corpus-stat-value">550+</div><div class="corpus-stat-label">AEMPS IPTs total</div></div>
+      <div class="corpus-stat-cell"><div class="corpus-stat-value">125</div><div class="corpus-stat-label">New IPTs in 2024</div></div>
+      <div class="corpus-stat-cell"><div class="corpus-stat-value">60</div><div class="corpus-stat-label">Oncology IPTs 2024</div></div>
+      <div class="corpus-stat-cell"><div class="corpus-stat-value">2,500+</div><div class="corpus-stat-label">EU decisions available</div></div>
+    </div>
+  </div>
+
+  <section class="honesty-section fade-up">
+    <div class="honesty-inner">
+      <h2 class="honesty-title">A note on what this is — and isn't</h2>
+      <p class="honesty-body">Verum is a validated concept with a working prototype seeded with real HTA data for PD-1/PD-L1 inhibitors in NSCLC. It is not a production product and has no paying customers yet.<br><br>The architecture is designed. The data model is built. The gap that Verum fills is real — no platform structures and cross-references EU HTA PICO specifications at scale. This prototype exists to validate whether that problem is urgent enough to build for.</p>
+      <div class="honesty-pill"><div class="honesty-pill-dot"></div>Concept in validation · May 2026 · Not for commercial use</div>
+    </div>
+  </section>
+
+  <section class="final-cta-section fade-up">
+    <h2 class="final-cta-title">See it in action.<br>Two minutes, real data.</h2>
+    <p class="final-cta-sub">The prototype shows the full four-step workflow with real decisions from AEMPS, NICE, and G-BA for pembrolizumab in NSCLC.</p>
+    <button class="hero-cta" onclick="showView('app')" style="position:relative;z-index:1">
+      Open the prototype <span class="hero-cta-arrow">→</span>
+    </button>
+  </section>
+
+  <footer class="l-footer">
+    <span class="l-footer-mark">verum</span>
+    <span class="l-footer-note">Concept prototype · May 2026 · Not for distribution</span>
+  </footer>
+
+</div><!-- /view-landing -->
+
+<!-- ══ APP VIEW ══ -->
+<div id="view-app" class="view">
+  <div class="app-back-bar">
+    <button class="app-back-btn" onclick="showView('landing')">← Back to overview</button>
+    <span style="color:#8a94a6;font-family:'DM Mono',monospace;font-size:11px">verum prototype · demo data only</span>
+  </div>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">verum</div>
+    <div class="logo-sub">HTA Evidence Intelligence</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Platform</div>
+    <div class="nav-item" onclick="showScreen('ingest')">⬆ Document Ingest <span class="nav-badge">3</span></div>
+    <div class="nav-item" onclick="showScreen('browse')">◫ Evidence Browser</div>
+    <div class="nav-section">Analysis</div>
+    <div class="nav-item active" onclick="showScreen('gap')">△ Gap Analysis</div>
+  </nav>
+  <div class="corpus-status">
+    <div class="corpus-label">Corpus Status</div>
+    <div class="corpus-stat"><span class="corpus-stat-label">Evidence units</span><span class="corpus-stat-value">12</span></div>
+    <div class="corpus-stat"><span class="corpus-stat-label">Validated</span><span class="corpus-stat-value" style="color:var(--green)">9</span></div>
+    <div class="corpus-stat"><span class="corpus-stat-label">Documents</span><span class="corpus-stat-value">7</span></div>
+    <div class="corpus-stat"><span class="corpus-stat-label">Last ingest</span><span class="corpus-stat-value">Mar 14</span></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <div style="display:flex;align-items:center">
+      <span class="header-title" id="header-title">Gap Analysis</span>
+      <span class="header-sub" id="header-sub">Cross-country PICO matrix · strategic recommendations</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm">Export PDF</button>
+      <button class="btn btn-primary btn-sm" onclick="showScreen('ingest')">+ Add Document</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- SCREEN: INGEST -->
+    <div id="screen-ingest" class="screen">
+      <div class="metrics">
+        <div class="metric-card"><div class="metric-label">Documents</div><div class="metric-value">7</div><span class="metric-delta delta-up">+2 this week</span></div>
+        <div class="metric-card"><div class="metric-label">Processed</div><div class="metric-value">6</div><div class="metric-sub">1 awaiting review</div></div>
+        <div class="metric-card"><div class="metric-label">Validated</div><div class="metric-value">9</div><div class="metric-sub">evidence units</div></div>
+        <div class="metric-card"><div class="metric-label">Avg confidence</div><div class="metric-value mono" style="font-size:22px">0.84</div><span class="metric-delta delta-neutral">per field</span></div>
+      </div>
+      <div class="ingest-upload" onclick="alert('Live: uploads PDF → Supabase Storage → PICO extraction Edge Function')">
+        <div class="ingest-upload-icon">⬆</div>
+        <div class="ingest-upload-title">Drop HTA documents here</div>
+        <div class="ingest-upload-sub">IPTs · NICE STAs · G-BA dossiers · PDF</div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-title">Source Documents</span></div>
+        <table><thead><tr><th>Document</th><th>Agency</th><th>Indication</th><th>Decision</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><div class="mono" style="color:var(--text)">IPT 043/2024 v.1</div><div style="font-size:11px;color:var(--text3)">Pembrolizumab · NSCLC 1L</div></td><td><div class="agency-tag">🇪🇸 AEMPS</div></td><td>NSCLC stage III/IV PD-L1 CPS ≥ 10</td><td>Jan 2024</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('pembrolizumab-aemps')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">TA 888 v.1</div><div style="font-size:11px;color:var(--text3)">Pembrolizumab · NSCLC 1L</div></td><td><div class="agency-tag">🇬🇧 NICE</div></td><td>NSCLC stage III/IV PD-L1 TPS ≥ 50%</td><td>Nov 2023</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('pembrolizumab-nice')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">IPT 021/2023 v.1</div><div style="font-size:11px;color:var(--text3)">Nivolumab · NSCLC 2L</div></td><td><div class="agency-tag">🇪🇸 AEMPS</div></td><td>NSCLC post-platinum, PD-L1 ≥ 1%</td><td>Sep 2023</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('nivolumab-aemps')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">TA 833 v.1</div><div style="font-size:11px;color:var(--text3)">Nivolumab · NSCLC 2L</div></td><td><div class="agency-tag">🇬🇧 NICE</div></td><td>NSCLC squamous, post-platinum</td><td>Jun 2023</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('nivolumab-nice')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">GBA-2024-0128</div><div style="font-size:11px;color:var(--text3)">Pembrolizumab · NSCLC 1L</div></td><td><div class="agency-tag">🇩🇪 G-BA</div></td><td>NSCLC non-squamous, PD-L1 TPS ≥ 50%</td><td>Mar 2024</td><td><span class="badge badge-amber"><span class="status-dot status-draft"></span>Draft</span></td><td><button class="btn btn-primary btn-sm" onclick="showDetail('pembrolizumab-gba')">Review →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">IPT 019/2024 v.1</div><div style="font-size:11px;color:var(--text3)">Atezolizumab · NSCLC 1L</div></td><td><div class="agency-tag">🇪🇸 AEMPS</div></td><td>NSCLC non-squamous, no EGFR/ALK</td><td>Feb 2024</td><td><span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span></td><td><button class="btn btn-ghost btn-sm" onclick="showDetail('atezolizumab-aemps')">View →</button></td></tr>
+          <tr><td><div class="mono" style="color:var(--text)">IPT 055/2024 v.1</div><div style="font-size:11px;color:var(--text3)">Durvalumab · NSCLC stage III</div></td><td><div class="agency-tag">🇪🇸 AEMPS</div></td><td>NSCLC unresectable stage III, post-CRT</td><td>May 2024</td><td><span class="badge badge-blue"><span class="status-dot status-processing"></span>Extracting</span></td><td><button class="btn btn-ghost btn-sm" disabled style="opacity:.4">Wait...</button></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- SCREEN: BROWSE -->
+    <div id="screen-browse" class="screen">
+      <div class="metrics">
+        <div class="metric-card"><div class="metric-label">Evidence units</div><div class="metric-value">12</div><span class="metric-delta delta-neutral">across 3 agencies</span></div>
+        <div class="metric-card"><div class="metric-label">Drugs covered</div><div class="metric-value">4</div><div class="metric-sub">PD-1/PD-L1 inhibitors</div></div>
+        <div class="metric-card"><div class="metric-label">Cross-agency matches</div><div class="metric-value">6</div><span class="metric-delta delta-up">same PICO, 2+ agencies</span></div>
+        <div class="metric-card"><div class="metric-label">Gap candidates</div><div class="metric-value">4</div><span class="metric-delta delta-neutral">NICE accepted, not AEMPS</span></div>
+      </div>
+      <div class="filters">
+        <span class="filter-label">Filter:</span>
+        <select><option>All agencies</option><option>AEMPS</option><option>NICE</option><option>G-BA</option></select>
+        <select><option>All drugs</option><option>Pembrolizumab</option><option>Nivolumab</option><option>Atezolizumab</option></select>
+        <select><option>All statuses</option><option>Accepted</option><option>Restricted</option><option>Rejected</option></select>
+        <input type="text" placeholder="Search indication..." style="width:200px">
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-title">Evidence Units</span><span style="font-size:11px;color:var(--text3);font-family:var(--mono)">12 results</span></div>
+        <table><thead><tr><th>Drug · Indication</th><th>Agency</th><th>Population</th><th>Comparator</th><th>Primary HR</th><th>Status</th><th></th></tr></thead>
+        <tbody id="browse-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SCREEN: GAP -->
+    <div id="screen-gap" class="screen active">
+
+      <!-- Step progress bar -->
+      <div class="step-bar">
+        <div class="step-tab active" id="stab-1" onclick="goStep(1)">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-name">Stage</div>
+            <div class="step-desc">Where are you?</div>
+          </div>
+        </div>
+        <div class="step-tab locked" id="stab-2" onclick="goStep(2)">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-name">Scope</div>
+            <div class="step-desc">Drug &amp; markets</div>
+          </div>
+        </div>
+        <div class="step-tab locked" id="stab-3" onclick="goStep(3)">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-name">Analysis</div>
+            <div class="step-desc">PICO comparison</div>
+          </div>
+        </div>
+        <div class="step-tab locked" id="stab-4" onclick="goStep(4)">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-name">Recommendation</div>
+            <div class="step-desc">Strategic actions</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 1: Stage selection -->
+      <div class="step-panel active" id="step-1">
+        <div style="margin-bottom:20px">
+          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">What stage is your asset at?</div>
+          <div style="font-size:13px;color:var(--text3)">Your answer shapes the analysis and the strategic recommendations you'll see.</div>
+        </div>
+        <div class="stage-grid">
+          <div class="stage-card" data-stage="ph3" onclick="selectStage(this)">
+            <div class="stage-card-icon">🔬</div>
+            <div class="stage-card-label">Phase II → III</div>
+            <div class="stage-card-desc">Designing the pivotal trial. Which study design satisfies all target markets simultaneously?</div>
+            <div class="stage-card-users">HEOR · Clinical Development</div>
+          </div>
+          <div class="stage-card" data-stage="prelaunch" onclick="selectStage(this)">
+            <div class="stage-card-icon">🚀</div>
+            <div class="stage-card-label">Pre-launch</div>
+            <div class="stage-card-desc">Deciding launch sequence and market entry. Where does current evidence give you access now?</div>
+            <div class="stage-card-users">Market Access · HEOR</div>
+          </div>
+          <div class="stage-card" data-stage="dossier" onclick="selectStage(this)">
+            <div class="stage-card-icon">📋</div>
+            <div class="stage-card-label">Dossier preparation</div>
+            <div class="stage-card-desc">Building the HTA submission. What precedents have agencies accepted for similar drugs?</div>
+            <div class="stage-card-users">Regulatory Affairs · HEOR</div>
+          </div>
+          <div class="stage-card" data-stage="newindication" onclick="selectStage(this)">
+            <div class="stage-card-icon">↗</div>
+            <div class="stage-card-label">New indication</div>
+            <div class="stage-card-desc">Expanding an approved drug to a new indication. What can be reused vs. what needs new evidence?</div>
+            <div class="stage-card-users">Clinical Development · HEOR</div>
+          </div>
+          <div class="stage-card" data-stage="intelligence" onclick="selectStage(this)">
+            <div class="stage-card-icon">📡</div>
+            <div class="stage-card-label">Market intelligence</div>
+            <div class="stage-card-desc">Monitoring competitor decisions and regulatory signals. What are agencies accepting right now?</div>
+            <div class="stage-card-users">Market Access · Strategy</div>
+          </div>
+        </div>
+        <div class="step-next-btn">
+          <button class="btn btn-primary" id="step1-next" disabled onclick="goStep(2)">Continue to Scope →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Scope -->
+      <div class="step-panel" id="step-2">
+        <div class="scope-panel">
+          <div class="scope-section">
+            <div class="scope-section-title">
+              <div class="scope-section-num">1</div>
+              Drug &amp; Indication
+            </div>
+            <div class="field-group" style="max-width:320px">
+              <div class="field-label">Select drug · indication</div>
+              <select id="gap-drug" style="width:100%">
+                <option value="pembrolizumab-1L">Pembrolizumab · NSCLC 1L</option>
+                <option value="nivolumab-2L">Nivolumab · NSCLC 2L</option>
+              </select>
+            </div>
+          </div>
+          <div class="scope-section">
+            <div class="scope-section-title">
+              <div class="scope-section-num">2</div>
+              Target markets
+            </div>
+            <div id="scope-context-note" class="stage-context-note">
+              <span>💡</span>
+              <span id="scope-context-text">Select the markets you want to compare.</span>
+            </div>
+            <div class="agency-pills" id="agency-pills">
+              <div class="agency-pill active" data-id="AEMPS" onclick="toggleAgency(this)">🇪🇸 AEMPS</div>
+              <div class="agency-pill active" data-id="NICE" onclick="toggleAgency(this)">🇬🇧 NICE</div>
+              <div class="agency-pill active" data-id="G-BA" onclick="toggleAgency(this)">🇩🇪 G-BA</div>
+              <div class="agency-pill" data-id="HAS" onclick="toggleAgency(this)">🇫🇷 HAS</div>
+              <div class="agency-pill jca-pill" data-id="JCA" onclick="toggleAgency(this)">◈ JCA 2025</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Run Analysis →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Matrix -->
+      <div class="step-panel" id="step-3">
+        <div id="matrix-area"></div>
+        <div class="step-nav">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Scope</button>
+          <button class="btn btn-primary" onclick="goStep(4)">See Recommendations →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Recommendation -->
+      <div class="step-panel" id="step-4">
+        <div id="rec-area"></div>
+        <div class="step-nav">
+          <button class="btn btn-ghost" onclick="goStep(3)">← Analysis</button>
+          <button class="btn btn-ghost">Export PDF</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SCREEN: DETAIL -->
+    <div id="screen-detail" class="screen">
+      <div class="back-btn" onclick="showScreen('browse')">← Back to browser</div>
+      <div id="detail-content"></div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/* ── DATA ── */
+const EU=[
+  {id:'pembrolizumab-aemps',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 043/2024',population:'NSCLC stage III/IV, no EGFR/ALK, PD-L1 CPS ≥ 10',biomarker:'PD-L1 CPS ≥ 10',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.69,ci_low:0.56,ci_high:0.85,pval:'0.0003',status:'validated',acceptance:'accepted',restrictions:'PD-L1 CPS ≥ 10 only',rationale:'Pembrolizumab demostró superioridad estadísticamente significativa en SG frente a quimioterapia de platino en la población PD-L1 CPS ≥ 10.',quote:'Se recomienda el uso de pembrolizumab en primera línea en pacientes con CPNM avanzado con expresión de PD-L1 CPS ≥ 10 que no presenten mutaciones EGFR ni reordenamientos ALK.',quotePage:8,extractedAt:'2024-03-10 09:14',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-11 14:32',cP:0.91,cI:0.97,cC:0.94,cO:0.88},
+  {id:'pembrolizumab-nice',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'NICE',flag:'🇬🇧',docRef:'TA 888',population:'NSCLC stage III/IV, no EGFR/ALK, PD-L1 TPS ≥ 50%',biomarker:'PD-L1 TPS ≥ 50%',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.63,ci_low:0.50,ci_high:0.79,pval:'< 0.001',status:'validated',acceptance:'accepted',restrictions:'PD-L1 TPS ≥ 50%; NHS commissioning criteria apply',rationale:'NICE recommends pembrolizumab as an option for untreated PD-L1 positive (TPS ≥ 50%) NSCLC without EGFR or ALK aberrations.',quote:'Pembrolizumab is recommended as an option for untreated PD-L1-positive (with a TPS of 50% or more) locally advanced or metastatic NSCLC in adults.',quotePage:4,extractedAt:'2024-03-12 11:05',model:'gpt-4o-2024-05-13',validatedBy:'Dr. Smith (HEOR)',validatedAt:'2024-03-13 10:17',cP:0.93,cI:0.98,cC:0.95,cO:0.92},
+  {id:'pembrolizumab-gba',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'G-BA',flag:'🇩🇪',docRef:'GBA-2024-0128',population:'NSCLC non-squamous, no EGFR/ALK, PD-L1 TPS ≥ 50%',biomarker:'PD-L1 TPS ≥ 50%',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-pemetrexed chemotherapy',comparatorType:'active',hr:0.71,ci_low:0.56,ci_high:0.90,pval:'0.004',status:'draft',acceptance:'restricted',restrictions:'Non-squamous only; TPS ≥ 50%',rationale:'Hinweis auf einen beträchtlichen Zusatznutzen bei Patienten mit nicht-squamösem NSCLC und PD-L1 TPS ≥ 50%.',quote:'Für die Patientengruppe mit nicht-plattenepithelialem NSCLC und TPS ≥ 50% ergibt sich ein Hinweis auf einen beträchtlichen Zusatznutzen.',quotePage:12,extractedAt:'2024-03-14 08:45',model:'gpt-4o-2024-05-13',validatedBy:null,validatedAt:null,cP:0.87,cI:0.96,cC:0.82,cO:0.79},
+  {id:'nivolumab-aemps',drug:'Nivolumab',inn:'nivolumab',indication:'NSCLC 2L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 021/2023',population:'NSCLC post-platinum chemotherapy, PD-L1 ≥ 1%',biomarker:'PD-L1 ≥ 1%',lot:'2L',intervention:'Nivolumab 3mg/kg Q2W',comparator:'Docetaxel 75mg/m² Q3W',comparatorType:'active',hr:0.73,ci_low:0.59,ci_high:0.89,pval:'0.002',status:'validated',acceptance:'accepted',restrictions:null,rationale:'Nivolumab demostró una mejoría estadísticamente significativa en la supervivencia global frente a docetaxel en pacientes previamente tratados con platino.',quote:'Se recomienda nivolumab en segunda línea en pacientes con CPNM avanzado previamente tratados con quimioterapia de platino.',quotePage:6,extractedAt:'2024-03-08 14:22',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-09 16:45',cP:0.89,cI:0.95,cC:0.93,cO:0.91},
+  {id:'nivolumab-nice',drug:'Nivolumab',inn:'nivolumab',indication:'NSCLC 2L',agency:'NICE',flag:'🇬🇧',docRef:'TA 833',population:'NSCLC squamous, post-platinum, all PD-L1 levels',biomarker:'No biomarker restriction',lot:'2L',intervention:'Nivolumab 240mg Q2W',comparator:'Docetaxel 75mg/m² Q3W',comparatorType:'active',hr:0.59,ci_low:0.44,ci_high:0.79,pval:'< 0.001',status:'validated',acceptance:'accepted',restrictions:'Squamous histology only per NHS commissioning',rationale:'NICE recommends nivolumab for previously treated squamous NSCLC, noting superior OS vs docetaxel without PD-L1 restriction.',quote:'Nivolumab is recommended as an option for treating locally advanced or metastatic squamous NSCLC after prior chemotherapy in adults.',quotePage:3,extractedAt:'2024-03-09 10:15',model:'gpt-4o-2024-05-13',validatedBy:'Dr. Smith (HEOR)',validatedAt:'2024-03-10 09:30',cP:0.92,cI:0.97,cC:0.96,cO:0.94},
+  {id:'atezolizumab-aemps',drug:'Atezolizumab',inn:'atezolizumab',indication:'NSCLC 1L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 019/2024',population:'NSCLC non-squamous, no EGFR/ALK, PD-L1 TC ≥ 50% or IC ≥ 10%',biomarker:'PD-L1 TC ≥ 50% or IC ≥ 10%',lot:'1L',intervention:'Atezolizumab 1200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.78,ci_low:0.64,ci_high:0.96,pval:'0.018',status:'validated',acceptance:'restricted',restrictions:'High PD-L1 only (TC ≥ 50% or IC ≥ 10%)',rationale:'El beneficio en SG se observó únicamente en la subpoblación con alta expresión de PD-L1.',quote:'El beneficio de atezolizumab se restringe a pacientes con expresión elevada de PD-L1 (TC ≥ 50% o IC ≥ 10%).',quotePage:9,extractedAt:'2024-03-13 16:30',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-14 11:20',cP:0.85,cI:0.96,cC:0.93,cO:0.87}
+];
+
+const JCA_DATA = {
+  'pembrolizumab-1L': { id:'JCA',flag:'◈',doc:'JCA-2025-ONK-031',status:'validated',acceptance:'accepted',
+    population:{value:'NSCLC stage III/IV, no EGFR/ALK, all histologies',sub:'Consolidated EU scope — 8 PICOs',match:'base'},
+    biomarker:{value:'PD-L1 TPS ≥ 1% + ≥ 50% subgroup',match:'base',note:'Broad scope; countries may restrict'},
+    comparator:{value:'Platinum-based chemotherapy',sub:'all regimens accepted',match:'base'},
+    endpoint:{value:'OS + PFS + HRQoL',sub:'all required at EU level',match:'base'},
+    design:{value:'RCT Phase III',sub:'Multiple trials accepted',match:'base'},
+    restrictions:'EU scope — individual countries add national restrictions'
+  },
+  'nivolumab-2L': { id:'JCA',flag:'◈',doc:'JCA-2025-ONK-018',status:'validated',acceptance:'accepted',
+    population:{value:'NSCLC post-platinum, all histologies',sub:'Consolidated EU scope',match:'base'},
+    biomarker:{value:'No biomarker restriction at EU level',match:'base',note:'Country-level variation persists'},
+    comparator:{value:'Docetaxel or BSC',sub:'country choice',match:'base'},
+    endpoint:{value:'OS + PFS',sub:'both required',match:'base'},
+    design:{value:'RCT Phase III',sub:'CheckMate 017/057',match:'base'},
+    restrictions:'No EU-level restriction'
+  }
+};
+
+const HAS_DATA = {
+  'pembrolizumab-1L': { id:'HAS',flag:'🇫🇷',doc:'CT-17429',status:'validated',acceptance:'restricted',
+    population:{value:'NSCLC stage III/IV, no EGFR/ALK',sub:'ASMR evaluation',match:'diverge',note:'ASMR IV (minor improvement)'},
+    biomarker:{value:'PD-L1 TPS ≥ 50%',match:'diverge',note:'TPS scale (FR)'},
+    comparator:{value:'Platinum-based chemotherapy',sub:'carboplatin/paclitaxel',match:'match'},
+    endpoint:{value:'OS only accepted',sub:'HR 0.63 [0.47–0.86]',match:'diverge',note:'PFS not sufficient for HAS'},
+    design:{value:'RCT Phase III',sub:'KEYNOTE-024',match:'match'},
+    restrictions:'ASMR IV; SMR important with restrictions'
+  },
+  'nivolumab-2L': { id:'HAS',flag:'🇫🇷',doc:'CT-16891',status:'validated',acceptance:'restricted',
+    population:{value:'NSCLC squamous + non-squamous, post-platinum',sub:'separate SMR per histology',match:'diverge',note:'Separate ASMR per subgroup'},
+    biomarker:{value:'No restriction',match:'match'},
+    comparator:{value:'Docetaxel 75mg/m² Q3W',match:'match'},
+    endpoint:{value:'OS primary',sub:'HR 0.71 [0.56–0.89]',match:'match'},
+    design:{value:'RCT Phase III',sub:'CheckMate 017/057',match:'match'},
+    restrictions:'ASMR IV squamous; ASMR V non-squamous'
+  }
+};
+
+const MATRIX_DATA = {
+  'pembrolizumab-1L': {
+    drug:'Pembrolizumab', indication:'NSCLC 1L',
+    agencies:[
+      { id:'AEMPS',flag:'🇪🇸',doc:'IPT 043/2024',status:'validated',acceptance:'accepted',
+        population:{value:'NSCLC stage III/IV, no EGFR/ALK',sub:'n = 305',match:'base'},
+        biomarker:{value:'PD-L1 CPS ≥ 10',match:'diverge',note:'CPS scale — differs from UK/DE',implication:'Dual biomarker testing required: both CPS (ES) and TPS (UK/DE) assays needed'},
+        comparator:{value:'Platinum-based chemotherapy',sub:'carboplatin/paclitaxel',match:'match'},
+        endpoint:{value:'Overall Survival (OS)',sub:'HR 0.69 [0.56–0.85]',match:'match'},
+        design:{value:'RCT Phase III',sub:'KEYNOTE-024 / -042',match:'match'},
+        restrictions:'PD-L1 CPS ≥ 10 only'
+      },
+      { id:'NICE',flag:'🇬🇧',doc:'TA 888',status:'validated',acceptance:'accepted',
+        population:{value:'NSCLC stage III/IV, no EGFR/ALK',sub:'n = 305',match:'base'},
+        biomarker:{value:'PD-L1 TPS ≥ 50%',match:'diverge',note:'TPS scale — higher threshold than ES',implication:'Higher TPS threshold means smaller eligible population in UK'},
+        comparator:{value:'Platinum-based chemotherapy',sub:'carboplatin/paclitaxel',match:'match'},
+        endpoint:{value:'Overall Survival (OS)',sub:'HR 0.63 [0.50–0.79]',match:'match'},
+        design:{value:'RCT Phase III',sub:'KEYNOTE-024',match:'match'},
+        restrictions:'TPS ≥ 50%; NHS commissioning criteria'
+      },
+      { id:'G-BA',flag:'🇩🇪',doc:'GBA-2024-0128',status:'draft',acceptance:'restricted',
+        population:{value:'NSCLC non-squamous only, no EGFR/ALK',sub:'n = 189 (subgroup)',match:'diverge',note:'Squamous excluded',implication:'Decision required: add squamous arm or exclude DE market'},
+        biomarker:{value:'PD-L1 TPS ≥ 50%',match:'diverge',note:'TPS scale (DE)'},
+        comparator:{value:'Platinum-pemetrexed',sub:'non-squamous SoC',match:'diverge',note:'Different SoC from ES/UK',implication:'Second comparator arm required to satisfy G-BA'},
+        endpoint:{value:'OS + PFS required',sub:'HR 0.71 [0.56–0.90]',match:'diverge',note:'PFS additionally required',implication:'PFS must be powered as co-primary endpoint'},
+        design:{value:'RCT Phase III',sub:'KEYNOTE-189',match:'match'},
+        restrictions:'Non-squamous only; TPS ≥ 50%'
+      }
+    ],
+    mcs:{
+      population:'NSCLC stage III/IV, no EGFR/ALK, non-squamous',
+      biomarker:'TPS ≥ 50% (NICE/G-BA) + CPS ≥ 10 (AEMPS) — dual assay required',
+      comparator:'Platinum-based (ES/UK) + pemetrexed combination (DE) — two arms',
+      endpoints:'OS primary (all) + PFS co-primary (G-BA)',
+      coverage:['🇪🇸 AEMPS','🇬🇧 NICE','🇩🇪 G-BA'],
+      partial:[],
+      gap_note:'Squamous subgroup covers ES + UK but not DE. A separate squamous arm covers all three without DE restriction.'
+    },
+    stageRecs:{
+      ph3:{
+        headline:'Your Phase III design has 3 critical decisions before locking the protocol',
+        actions:[
+          {n:'1',text:'<strong>Dual comparator arms:</strong> platinum-based chemo (ES/UK) AND platinum-pemetrexed (DE). Single-arm design will exclude Germany.'},
+          {n:'2',text:'<strong>Power PFS as co-primary:</strong> G-BA requires PFS alongside OS. OS-only design will face restriction in Germany.'},
+          {n:'3',text:'<strong>Plan dual biomarker strategy:</strong> both TPS (NICE/G-BA) and CPS (AEMPS) assays must be pre-specified. Retrospective sub-analyses will not be accepted.'},
+          {n:'4',text:'<strong>Squamous subgroup:</strong> including squamous patients satisfies ES + UK. A separate squamous arm adds Germany. Evaluate cost vs. market size.'}
+        ],
+        warning:'G-BA uses a different comparator (platinum-pemetrexed) than ES/UK (platinum-based). A single-arm trial will fail AMNOG assessment in Germany regardless of OS results.'
+      },
+      prelaunch:{
+        headline:'Current evidence profile supports launch in ES + UK. Germany requires additional data.',
+        actions:[
+          {n:'1',text:'<strong>Launch sequencing:</strong> ES and UK have sufficient evidence for immediate IPT/STA submission. No additional studies required.'},
+          {n:'2',text:'<strong>Germany gap:</strong> non-squamous only restriction and pemetrexed comparator requirement means current evidence package partially satisfies G-BA. Evaluate bridging study.'},
+          {n:'3',text:'<strong>Pricing implication:</strong> G-BA restriction to non-squamous PD-L1 TPS ≥ 50% significantly reduces eligible patient volume. Factor into German price negotiation.'},
+          {n:'4',text:'<strong>France (HAS):</strong> add HAS to agency selection to assess ASMR implications for French market entry.'}
+        ],
+        warning:'Do not submit simultaneously to all markets with identical evidence packages. Tailor each dossier to national PICO specifications.'
+      },
+      dossier:{
+        headline:'Three PICO mismatches require specific narrative strategies per agency',
+        actions:[
+          {n:'1',text:'<strong>AEMPS (Spain):</strong> centre narrative on CPS ≥ 10 subgroup data from KEYNOTE-042. AEMPS has consistently accepted CPS-based biomarker stratification for PD-1 inhibitors.'},
+          {n:'2',text:'<strong>NICE (UK):</strong> TPS ≥ 50% is the accepted threshold. Cost-effectiveness model must use NHS SoC pricing. KEYNOTE-024 is the primary evidence base.'},
+          {n:'3',text:'<strong>G-BA (DE):</strong> AMNOG dossier requires head-to-head benefit vs. pemetrexed combination. Non-squamous restriction must be explicitly framed. Quantify additional benefit.'},
+          {n:'4',text:'<strong>JCA alignment:</strong> if JCA scope is active, ensure all national dossiers are consistent with the consolidated EU PICO — agencies will cross-reference.'}
+        ],
+        warning:'Using the same evidence narrative for all three agencies is the most common avoidable cause of HTA restriction. Each agency reads their own precedents.'
+      },
+      newindication:{
+        headline:'PD-1/PD-L1 precedents across agencies suggest high reusability for adjacent indications',
+        actions:[
+          {n:'1',text:'<strong>Comparator stability:</strong> platinum-based chemotherapy is consistently accepted as SoC comparator for lung oncology across ES/UK. This is likely to hold for adjacent indications.'},
+          {n:'2',text:'<strong>Biomarker strategy:</strong> all three agencies require PD-L1 stratification. Plan new indication trials with same dual-assay approach (CPS + TPS) from Phase II.'},
+          {n:'3',text:'<strong>G-BA divergence persists:</strong> Germany\'s histology-based restrictions and different comparator requirements are likely to replicate in new indications. Budget for separate German evidence strategy.'},
+          {n:'4',text:'<strong>Cross-indication reuse:</strong> OS and PFS data from NSCLC trials can partially support other solid tumour submissions. Identify overlap before commissioning new studies.'}
+        ],
+        warning:null
+      },
+      intelligence:{
+        headline:'3 active divergences between agencies create ongoing competitive intelligence signals',
+        actions:[
+          {n:'1',text:'<strong>Biomarker signal:</strong> AEMPS CPS vs. NICE/G-BA TPS divergence is a known fragmentation point. Monitor whether JCA 2025 scope documents begin harmonising biomarker specifications.'},
+          {n:'2',text:'<strong>Comparator drift:</strong> G-BA\'s use of pemetrexed combination as SoC may shift as new frontline standards emerge. Track G-BA decisions quarterly.'},
+          {n:'3',text:'<strong>JCA impact:</strong> first JCA reports expected 2026. The delta between JCA consolidated PICO and national decisions will define whether this fragmentation persists or narrows.'},
+          {n:'4',text:'<strong>Competitive positioning:</strong> any competitor PD-1 submission to AEMPS or G-BA will reveal updated biomarker thresholds. Set corpus alert for new IPT and G-BA decisions in NSCLC.'}
+        ],
+        warning:null
+      }
+    }
+  },
+  'nivolumab-2L': {
+    drug:'Nivolumab', indication:'NSCLC 2L',
+    agencies:[
+      { id:'AEMPS',flag:'🇪🇸',doc:'IPT 021/2023',status:'validated',acceptance:'accepted',
+        population:{value:'NSCLC post-platinum, all histologies',sub:'PD-L1 ≥ 1%',match:'base'},
+        biomarker:{value:'PD-L1 ≥ 1%',match:'diverge',note:'Low threshold (Spain)',implication:'Low threshold means broader eligible population in ES than UK'},
+        comparator:{value:'Docetaxel 75mg/m² Q3W',match:'match'},
+        endpoint:{value:'Overall Survival (OS)',sub:'HR 0.73 [0.59–0.89]',match:'match'},
+        design:{value:'RCT Phase III',sub:'CheckMate 017/057',match:'match'},
+        restrictions:null
+      },
+      { id:'NICE',flag:'🇬🇧',doc:'TA 833',status:'validated',acceptance:'accepted',
+        population:{value:'NSCLC squamous only, post-platinum',sub:'all PD-L1 levels',match:'diverge',note:'Squamous only (UK)',implication:'Non-squamous patients excluded from NHS funding — significant population gap'},
+        biomarker:{value:'No restriction',match:'diverge',note:'No biomarker required'},
+        comparator:{value:'Docetaxel 75mg/m² Q3W',match:'match'},
+        endpoint:{value:'Overall Survival (OS)',sub:'HR 0.59 [0.44–0.79]',match:'match'},
+        design:{value:'RCT Phase III',sub:'CheckMate 017',match:'match'},
+        restrictions:'Squamous histology only per NHS commissioning'
+      },
+      { id:'G-BA',flag:'🇩🇪',doc:'—',status:'gap',acceptance:'not-evaluated',
+        population:{value:'Not evaluated',match:'gap',implication:'No German evidence base — full AMNOG submission required before DE launch'},
+        biomarker:{value:'—',match:'gap'},
+        comparator:{value:'—',match:'gap'},
+        endpoint:{value:'—',match:'gap'},
+        design:{value:'—',match:'gap'},
+        restrictions:null
+      }
+    ],
+    mcs:{
+      population:'NSCLC squamous + non-squamous, post-platinum',
+      biomarker:'No restriction required (NICE) — PD-L1 ≥ 1% data needed for AEMPS only',
+      comparator:'Docetaxel 75mg/m² Q3W (consistent across ES/UK)',
+      endpoints:'OS primary endpoint sufficient for ES + UK',
+      coverage:['🇪🇸 AEMPS','🇬🇧 NICE'],
+      partial:[],
+      gap_note:'G-BA has not evaluated nivolumab 2L. Full AMNOG submission required before German market entry.'
+    },
+    stageRecs:{
+      ph3:{
+        headline:'ES + UK evidence is sufficient. Germany requires a dedicated submission strategy.',
+        actions:[
+          {n:'1',text:'<strong>Comparator consistency:</strong> docetaxel 75mg/m² Q3W is accepted by both AEMPS and NICE. No comparator arm conflict — single-arm design works for ES/UK.'},
+          {n:'2',text:'<strong>Histology strategy:</strong> include both squamous and non-squamous patients. AEMPS accepts all histologies; NICE restricts to squamous — but non-squamous data strengthens AEMPS dossier.'},
+          {n:'3',text:'<strong>Germany gap:</strong> G-BA has not evaluated nivolumab 2L. A new AMNOG dossier is required. Assess whether G-BA SoC for 2L is still docetaxel or has shifted.'},
+          {n:'4',text:'<strong>Biomarker pre-specification:</strong> AEMPS requires PD-L1 ≥ 1% data. NICE has no restriction. Pre-specify PD-L1 strata from Phase II to enable both submissions.'}
+        ],
+        warning:'NICE covers squamous only. Non-squamous patients in the UK are outside NHS funding scope regardless of trial results. Do not overstate UK market size in your business case.'
+      },
+      prelaunch:{
+        headline:'Launch-ready for ES and UK. Germany is an evidence gap — not a quick fix.',
+        actions:[
+          {n:'1',text:'<strong>Immediate submissions:</strong> current evidence satisfies IPT (AEMPS) and STA (NICE) requirements. Both markets are accessible without additional studies.'},
+          {n:'2',text:'<strong>UK market sizing:</strong> NHS restricts to squamous only — adjust revenue projections accordingly. Non-squamous 2L patients in UK are not addressable with current label.'},
+          {n:'3',text:'<strong>Germany entry decision:</strong> no G-BA precedent means a full AMNOG dossier is required. Timeline: 12–18 months minimum. Evaluate ROI before committing.'},
+          {n:'4',text:'<strong>France:</strong> activate HAS column to assess French market accessibility with current evidence package.'}
+        ],
+        warning:null
+      },
+      dossier:{
+        headline:'Two distinct dossier strategies required — AEMPS and NICE have different population scopes.',
+        actions:[
+          {n:'1',text:'<strong>AEMPS:</strong> all histologies accepted. Lead with PD-L1 ≥ 1% subgroup data (CheckMate 057 non-squamous + CheckMate 017 squamous). Full population narrative.'},
+          {n:'2',text:'<strong>NICE:</strong> squamous only per commissioning policy. CheckMate 017 is the primary evidence base. Do not lead with non-squamous data — it is outside NHS scope.'},
+          {n:'3',text:'<strong>Separate evidence packages:</strong> do not submit the same document to AEMPS and NICE. Population scope is different enough to warrant fully distinct dossiers.'},
+          {n:'4',text:'<strong>G-BA:</strong> no submission possible without dedicated AMNOG dossier. Flag as future milestone.'}
+        ],
+        warning:'AEMPS accepts all histologies; NICE covers squamous only. Submitting a combined-histology narrative to NICE will create confusion with NHS commissioning criteria.'
+      },
+      newindication:{
+        headline:'Strong precedent in 2L NSCLC supports adjacent indication expansion — with caveats.',
+        actions:[
+          {n:'1',text:'<strong>Comparator reuse:</strong> docetaxel as active comparator is well-established in 2L solid tumours. Likely to be accepted in adjacent indications.'},
+          {n:'2',text:'<strong>Histology fragmentation risk:</strong> NICE\'s squamous-only restriction in NSCLC may replicate in other indications with histological heterogeneity. Plan histology-stratified designs.'},
+          {n:'3',text:'<strong>Germany first:</strong> if expanding to a new indication, consider German AMNOG submission as part of the initial launch package — not a follow-on. G-BA\'s absence in 2L NSCLC is a commercial gap.'},
+          {n:'4',text:'<strong>Biomarker strategy:</strong> AEMPS low-threshold approach (PD-L1 ≥ 1%) may indicate Spanish agency preference for broad access. Factor into new indication biomarker design.'}
+        ],
+        warning:null
+      },
+      intelligence:{
+        headline:'NICE histology restriction and G-BA absence are active market intelligence signals.',
+        actions:[
+          {n:'1',text:'<strong>NICE non-squamous gap:</strong> monitor whether any competitor PD-1 inhibitor obtains NICE approval for non-squamous 2L NSCLC. This would signal a policy shift with direct competitive impact.'},
+          {n:'2',text:'<strong>G-BA watch:</strong> if a competitor submits nivolumab or similar checkpoint inhibitor for 2L NSCLC to G-BA, the resulting decision will reveal current German SoC and acceptable endpoints.'},
+          {n:'3',text:'<strong>JCA monitoring:</strong> 2L NSCLC is in scope for JCA oncology assessments from 2025. A JCA scope document for this class would provide the first EU-consolidated PICO for 2L — significant intelligence.'},
+          {n:'4',text:'<strong>AEMPS precedent tracking:</strong> AEMPS\'s broad PD-L1 ≥ 1% threshold is generous compared to EU peers. Monitor whether JCA harmonisation pressure narrows this in future IPTs.'}
+        ],
+        warning:null
+      }
+    }
+  }
+};
+
+/* ── STATE ── */
+let currentStage = null;
+let currentStep = 1;
+const stepsDone = new Set();
+
+const STAGE_META = {
+  ph3:          {icon:'🔬', label:'Phase II → III',   color:'var(--accent)',  bg:'var(--accent-light)'},
+  prelaunch:    {icon:'🚀', label:'Pre-launch',        color:'var(--green)',   bg:'var(--green-bg)'},
+  dossier:      {icon:'📋', label:'Dossier prep',      color:'var(--purple)',  bg:'var(--purple-bg)'},
+  newindication:{icon:'↗',  label:'New indication',    color:'var(--amber)',   bg:'var(--amber-bg)'},
+  intelligence: {icon:'📡', label:'Market intelligence',color:'#0891b2',       bg:'#ecfeff'}
+};
+
+const SCOPE_CONTEXT = {
+  ph3:          'Select every market you are designing the trial for. The analysis will identify where requirements conflict and what design satisfies all of them.',
+  prelaunch:    'Select the markets you are considering for launch. The analysis will show which are immediately accessible and where you have evidence gaps.',
+  dossier:      'Select the agency you are preparing the submission for. Add others to see how their precedents compare.',
+  newindication:'Select markets where you want to expand. The analysis will show which evidence from the parent indication carries over.',
+  intelligence: 'Select any combination of markets to monitor. The analysis will highlight active PICO divergences and signals to watch.'
+};
+
+/* ── HELPERS ── */
+function ab(s){
+  if(s==='accepted') return '<span class="badge badge-green">✓ Accepted</span>';
+  if(s==='restricted') return '<span class="badge badge-amber">⚡ Restricted</span>';
+  if(s==='rejected') return '<span class="badge badge-red">✗ Rejected</span>';
+  return '<span class="badge badge-gray">— Not evaluated</span>';
+}
+function sb(s){
+  if(s==='validated') return '<span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span>';
+  if(s==='draft') return '<span class="badge badge-amber"><span class="status-dot status-draft"></span>Draft</span>';
+  return '';
+}
+function cc(v){return v>=0.9?'conf-high':v>=0.7?'conf-med':'conf-low';}
+function fl(c){return{AEMPS:'🇪🇸',NICE:'🇬🇧','G-BA':'🇩🇪',HAS:'🇫🇷'}[c]||'';}
+function cellClass(match){
+  if(match==='match') return 'cell-match';
+  if(match==='diverge') return 'cell-diverge';
+  if(match==='gap') return 'cell-gap cell-na';
+  return '';
+}
+
+/* ── NAV ── */
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  const t={
+    browse:['Evidence Browser','12 evidence units · 3 agencies'],
+    gap:['Gap Analysis','Cross-country PICO matrix · strategic recommendations'],
+    ingest:['Document Ingest','7 documents · 6 processed'],
+    detail:['Evidence Detail','PICO + Provenance']
+  };
+  document.getElementById('screen-'+n).classList.add('active');
+  document.getElementById('header-title').textContent=t[n][0];
+  document.getElementById('header-sub').textContent=t[n][1];
+  const m={browse:1,gap:2,ingest:0};
+  if(m[n]!==undefined) document.querySelectorAll('.nav-item')[m[n]].classList.add('active');
+}
+
+/* ── STEPPED WORKFLOW ── */
+function goStep(n){
+  // Can only go to done steps or step 1, or unlock in sequence
+  if(n>1 && !stepsDone.has(n-1) && n!==currentStep+1) return;
+  if(n===2 && !currentStage) return;
+
+  currentStep = n;
+
+  // Update panels
+  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+
+  // Update tabs
+  document.querySelectorAll('.step-tab').forEach((t,i)=>{
+    const idx = i+1;
+    t.classList.remove('active','done','locked');
+    if(idx === n) t.classList.add('active');
+    else if(stepsDone.has(idx)) t.classList.add('done');
+    else if(idx > n && !stepsDone.has(idx)) t.classList.add('locked');
+  });
+
+  // On entering step 3, build matrix
+  if(n===3){ buildMatrix(); stepsDone.add(3); }
+  // On entering step 4, build recommendation
+  if(n===4){ buildRec(); stepsDone.add(4); }
+}
+
+function selectStage(el){
+  document.querySelectorAll('.stage-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  currentStage = el.dataset.stage;
+  stepsDone.add(1);
+  document.getElementById('step1-next').disabled = false;
+
+  // Update scope context note when they go to step 2
+  document.getElementById('scope-context-text').textContent = SCOPE_CONTEXT[currentStage];
+
+  // Update tab 1 to done
+  document.getElementById('stab-1').classList.remove('active');
+  document.getElementById('stab-1').classList.add('done');
+  document.getElementById('stab-2').classList.remove('locked');
+}
+
+function toggleAgency(el){
+  const pills = document.querySelectorAll('.agency-pill:not(.jca-pill)');
+  const activeNonJca = [...pills].filter(p=>p.classList.contains('active'));
+  if(!el.classList.contains('jca-pill') && el.classList.contains('active') && activeNonJca.length<=1) return;
+  el.classList.toggle('active');
+}
+
+function getSelectedAgencies(){
+  return [...document.querySelectorAll('.agency-pill.active')].map(p=>p.dataset.id);
+}
+
+/* ── BROWSE ── */
+function renderBrowse(){
+  document.getElementById('browse-body').innerHTML=EU.map(eu=>`
+    <tr onclick="showDetail('${eu.id}')">
+      <td><div class="drug-chip">${eu.drug}</div><div class="indication-chip">${eu.indication}</div></td>
+      <td><div class="agency-tag">${eu.flag} ${eu.agency}</div></td>
+      <td style="max-width:220px"><div style="font-size:11px;color:var(--text2);line-height:1.4">${eu.population}</div>${eu.biomarker!=='No biomarker restriction'?`<span class="badge badge-amber" style="margin-top:4px;font-size:9px">${eu.biomarker}</span>`:''}</td>
+      <td>${eu.comparator.split(' ').slice(0,3).join(' ')}...</td>
+      <td><span class="hr-value">${eu.hr}</span> <span class="ci-value">[${eu.ci_low}–${eu.ci_high}]</span></td>
+      <td>${ab(eu.acceptance)}</td>
+      <td><button class="btn btn-ghost btn-sm">View →</button></td>
+    </tr>`).join('');
+}
+
+/* ── DETAIL ── */
+function showDetail(id){
+  const eu=EU.find(e=>e.id===id); if(!eu) return;
+  document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px">${eu.drug} · ${eu.indication}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="agency-tag">${eu.flag} ${eu.agency}</div>
+          <span class="mono" style="color:var(--text3)">${eu.docRef}</span>
+          ${sb(eu.status)} ${ab(eu.acceptance)}
+        </div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-card-header">Population <span><span class="conf-dot ${cc(eu.cP)}"></span> ${Math.round(eu.cP*100)}%</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Definition</span><span class="detail-field-value">${eu.population}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Biomarker</span><span class="detail-field-value" style="color:var(--amber)">${eu.biomarker}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Line</span><span class="detail-field-value">${eu.lot}</span></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Intervention <span><span class="conf-dot ${cc(eu.cI)}"></span> ${Math.round(eu.cI*100)}%</span></div>
+        <div class="detail-card-body"><div class="detail-field"><span class="detail-field-label">Drug + regimen</span><span class="detail-field-value">${eu.intervention}</span></div></div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Comparator <span><span class="conf-dot ${cc(eu.cC)}"></span> ${Math.round(eu.cC*100)}%</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Comparator</span><span class="detail-field-value">${eu.comparator}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Type</span><span class="detail-field-value">${eu.comparatorType.replace('_',' ')}</span></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Primary Outcome (OS) <span><span class="conf-dot ${cc(eu.cO)}"></span> ${Math.round(eu.cO*100)}%</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Hazard ratio</span><span class="detail-field-value"><span class="hr-value">${eu.hr}</span> <span class="ci-value">[${eu.ci_low}–${eu.ci_high}]</span></span></div>
+          <div class="detail-field"><span class="detail-field-label">p-value</span><span class="detail-field-value mono">${eu.pval}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="acceptance-panel">
+      <div class="full-card-header">◎ Agency acceptance</div>
+      <div class="acceptance-row">
+        <div class="acceptance-agency"><div class="agency-tag">${eu.flag} ${eu.agency}</div></div>
+        <div class="acceptance-status-cell">${ab(eu.acceptance)}</div>
+        <div class="acceptance-detail">${eu.restrictions?`<span class="restriction-tag">⚡ ${eu.restrictions}</span><br><br>`:''}${eu.rationale}</div>
+      </div>
+    </div>
+    <div class="full-card">
+      <div class="full-card-header">↗ Provenance & audit trail</div>
+      <div class="prov-timeline">
+        <div class="prov-item"><div class="prov-dot"></div><div><div class="prov-action">Extracted by LLM</div><div class="prov-meta">${eu.model} · ${eu.extractedAt}</div><div class="prov-quote">"${eu.quote}" <span style="color:var(--text3)">— p.${eu.quotePage}</span></div></div></div>
+        ${eu.validatedBy
+          ?`<div class="prov-item"><div class="prov-dot" style="background:var(--green)"></div><div><div class="prov-action">Validated by human reviewer</div><div class="prov-meta">${eu.validatedBy} · ${eu.validatedAt}</div></div></div>`
+          :`<div class="prov-item"><div class="prov-dot" style="background:var(--amber)"></div><div><div class="prov-action">Awaiting human validation</div><div class="prov-meta">No reviewer assigned yet</div></div></div>`}
+      </div>
+    </div>`;
+  showScreen('detail');
+}
+
+/* ── BUILD MATRIX (Step 3) ── */
+function buildMatrix(){
+  const key = document.getElementById('gap-drug').value;
+  const D = MATRIX_DATA[key];
+  if(!D){ document.getElementById('matrix-area').innerHTML=''; return; }
+
+  const selected = getSelectedAgencies();
+  const showJCA = selected.includes('JCA');
+  const nationalIds = selected.filter(s=>s!=='JCA');
+
+  let agencies = D.agencies.filter(a=>nationalIds.includes(a.id));
+  if(nationalIds.includes('HAS') && HAS_DATA[key]) agencies = [...agencies, HAS_DATA[key]];
+  const allColumns = showJCA ? [{...JCA_DATA[key], isJCA:true}, ...agencies] : agencies;
+
+  const matchCount = agencies.filter(a=>a.comparator.match==='match'&&a.endpoint.match==='match').length;
+  const divergeCount = agencies.reduce((n,a)=>n+[a.biomarker,a.population,a.comparator,a.endpoint,a.design].filter(f=>f&&f.match==='diverge').length,0);
+  const gapCount = agencies.filter(a=>a.acceptance==='not-evaluated').length;
+  const gridTpl = `130px ${allColumns.map(()=>'1fr').join(' ')}`;
+
+  const PICO_ROWS = [
+    {key:'population',label:'Population'},
+    {key:'biomarker', label:'Biomarker'},
+    {key:'comparator',label:'Comparator'},
+    {key:'endpoint',  label:'Primary endpoint'},
+    {key:'design',    label:'Study design'},
+  ];
+
+  const agencyHeaders = allColumns.map(a=>`
+    <div class="matrix-header-cell agency-col" style="${a.isJCA?'background:#eff4ff;border-bottom:2px solid var(--accent)':''}">
+      <span>${a.flag}</span>
+      <div>
+        <div style="color:${a.isJCA?'var(--accent)':'var(--text)'};font-weight:600;font-size:12px">${a.id}</div>
+        <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">${a.doc}</div>
+      </div>
+      <div style="margin-left:auto">${a.acceptance==='not-evaluated'?'<span class="badge badge-gray">—</span>':ab(a.acceptance)}</div>
+    </div>`).join('');
+
+  const bodyRows = PICO_ROWS.map(row=>{
+    const cells = allColumns.map(a=>{
+      const f = a[row.key];
+      if(!f||f.value==='—') return `<div class="matrix-cell cell-na"><span style="color:var(--text3);font-size:11px;font-style:italic">Not evaluated</span></div>`;
+      const isJcaCol = a.isJCA;
+      const cellCls = isJcaCol ? 'cell-jca' : cellClass(f.match);
+      return `<div class="matrix-cell ${cellCls}">
+        <span class="cell-value">${f.value}</span>
+        ${f.sub?`<span class="cell-sub">${f.sub}</span>`:''}
+        ${f.note?`<span class="cell-sub" style="color:${isJcaCol?'var(--accent)':'var(--amber)'};font-style:italic">${f.note}</span>`:''}
+        ${isJcaCol?'<span class="jca-flag">◈ EU reference</span>':''}
+        ${!isJcaCol&&f.match==='match'?'<span class="match-flag">✓ aligned</span>':''}
+        ${!isJcaCol&&f.match==='diverge'?'<span class="diverge-flag">⚡ diverges</span>':''}
+        ${!isJcaCol&&f.match==='gap'?'<span class="gap-flag">✗ not evaluated</span>':''}
+        ${!isJcaCol&&f.implication?`<div class="cell-implication"><strong>→</strong> ${f.implication}</div>`:''}
+      </div>`;
+    }).join('');
+    return `<div class="matrix-row" style="display:grid;grid-template-columns:${gridTpl}">
+      <div class="matrix-cell pico-label">${row.label}</div>${cells}
+    </div>`;
+  }).join('');
+
+  const restrictionRow = `<div class="matrix-row" style="display:grid;grid-template-columns:${gridTpl};background:var(--surface2)">
+    <div class="matrix-cell pico-label">Restrictions</div>
+    ${allColumns.map(a=>`<div class="matrix-cell" style="${a.isJCA?'background:#eff4ff':''}">
+      ${a.restrictions?`<span class="restriction-tag">⚡ ${a.restrictions}</span>`:`<span style="color:var(--text3);font-size:11px">None</span>`}
+    </div>`).join('')}
+  </div>`;
+
+  const jcaBanner = showJCA ? `<div class="jca-banner">◈ <strong>JCA column active</strong> — EU consolidated PICO shown as reference. National column colours show divergence from EU scope.</div>` : '';
+
+  document.getElementById('matrix-area').innerHTML=`
+    ${jcaBanner}
+    <div class="gap-summary-bar">
+      <div class="summary-pill"><div class="summary-pill-value">${agencies.length}${showJCA?' +JCA':''}</div><div class="summary-pill-label">Agencies</div></div>
+      <div class="summary-pill ${matchCount===agencies.length?'highlight':''}"><div class="summary-pill-value">${matchCount}</div><div class="summary-pill-label">Fully aligned</div></div>
+      <div class="summary-pill ${divergeCount>0?'warn':''}"><div class="summary-pill-value">${divergeCount}</div><div class="summary-pill-label">Divergences</div></div>
+      <div class="summary-pill ${gapCount>0?'danger':''}"><div class="summary-pill-value">${gapCount}</div><div class="summary-pill-label">Evidence gaps</div></div>
+    </div>
+    <div class="matrix-legend">
+      <span style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-right:4px">Legend</span>
+      <div class="legend-item"><div class="legend-dot legend-dot-match"></div> Aligned</div>
+      <div class="legend-item"><div class="legend-dot legend-dot-diverge"></div> Diverges — action required</div>
+      <div class="legend-item"><div class="legend-dot legend-dot-gap"></div> Not evaluated</div>
+      ${showJCA?'<div class="legend-item"><div class="legend-dot legend-dot-jca"></div> JCA EU reference</div>':''}
+    </div>
+    <div class="matrix-wrap">
+      <div class="matrix-header-row" style="display:grid;grid-template-columns:${gridTpl}">
+        <div class="matrix-header-cell">PICO dimension</div>${agencyHeaders}
+      </div>
+      ${bodyRows}${restrictionRow}
+    </div>`;
+}
+
+/* ── BUILD RECOMMENDATION (Step 4) ── */
+function buildRec(){
+  const key = document.getElementById('gap-drug').value;
+  const D = MATRIX_DATA[key];
+  if(!D||!currentStage) return;
+
+  const rec = D.stageRecs[currentStage];
+  const meta = STAGE_META[currentStage];
+  const selected = getSelectedAgencies().filter(s=>s!=='JCA');
+
+  const mcsCoverage = D.mcs.coverage
+    .filter(c=>selected.some(id=>c.includes(id)))
+    .map(c=>`<span class="coverage-agency coverage-ok">✓ ${c}</span>`).join('')
+    + D.mcs.partial.map(c=>`<span class="coverage-agency coverage-partial">~ ${c}</span>`).join('');
+
+  document.getElementById('rec-area').innerHTML=`
+    <div class="rec-panel" style="border-color:${meta.color}20">
+      <div class="rec-header" style="background:${meta.bg}">
+        <div class="rec-header-icon">${meta.icon}</div>
+        <div class="rec-header-content">
+          <div class="rec-header-title">${rec.headline}</div>
+          <span class="rec-header-stage" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.color}40">${meta.icon} ${meta.label}</span>
+        </div>
+      </div>
+      <div class="mcs-section">
+        <div class="mcs-section-title">Minimum covering evidence set — satisfies all selected markets</div>
+        <div class="mcs-grid">
+          <div class="mcs-field"><div class="mcs-field-label">Population</div><div class="mcs-field-value">${D.mcs.population}</div></div>
+          <div class="mcs-field"><div class="mcs-field-label">Biomarker</div><div class="mcs-field-value">${D.mcs.biomarker}</div></div>
+          <div class="mcs-field"><div class="mcs-field-label">Comparator</div><div class="mcs-field-value">${D.mcs.comparator}</div></div>
+          <div class="mcs-field"><div class="mcs-field-label">Endpoints</div><div class="mcs-field-value">${D.mcs.endpoints}</div></div>
+        </div>
+        <div class="mcs-coverage"><span class="mcs-coverage-label">Covers:</span>${mcsCoverage}</div>
+      </div>
+      <div class="rec-actions">
+        <div class="rec-action-label">Strategic actions for ${meta.label}</div>
+        ${rec.actions.map(a=>`
+          <div class="rec-action-item">
+            <div class="rec-action-num">${a.n}</div>
+            <div>${a.text}</div>
+          </div>`).join('')}
+      </div>
+      ${rec.warning?`<div class="rec-warning rec-warning-amber">⚠ ${rec.warning}</div>`:''}
+      ${D.mcs.gap_note?`<div class="rec-warning rec-warning-amber">⚡ ${D.mcs.gap_note}</div>`:''}
+    </div>`;
+}
+
+/* ── INIT ── */
+renderBrowse();
+showScreen('gap');
+
+
+</script>
+</body>
+</html>
+</script>
+
+</div><!-- /view-app -->
+
+<script>
+/* ── VIEW SWITCHING ── */
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  window.scrollTo(0, 0);
+  if (v === 'app') {
+    // init prototype if first time
+    if (!window._appInit) {
+      window._appInit = true;
+      renderBrowse();
+      showScreen('gap');
+    }
+  }
+}
+
+/* ── LANDING SCROLL ANIMATIONS ── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+/* ── PROTOTYPE SCRIPT ── */
+
+/* ── DATA ── */
+const EU=[
+  {id:'pembrolizumab-aemps',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 043/2024',population:'NSCLC stage III/IV, no EGFR/ALK, PD-L1 CPS ≥ 10',biomarker:'PD-L1 CPS ≥ 10',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.69,ci_low:0.56,ci_high:0.85,pval:'0.0003',status:'validated',acceptance:'accepted',restrictions:'PD-L1 CPS ≥ 10 only',rationale:'Pembrolizumab demostró superioridad estadísticamente significativa en SG frente a quimioterapia de platino en la población PD-L1 CPS ≥ 10.',quote:'Se recomienda el uso de pembrolizumab en primera línea en pacientes con CPNM avanzado con expresión de PD-L1 CPS ≥ 10 que no presenten mutaciones EGFR ni reordenamientos ALK.',quotePage:8,extractedAt:'2024-03-10 09:14',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-11 14:32',cP:0.91,cI:0.97,cC:0.94,cO:0.88},
+  {id:'pembrolizumab-nice',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'NICE',flag:'🇬🇧',docRef:'TA 888',population:'NSCLC stage III/IV, no EGFR/ALK, PD-L1 TPS ≥ 50%',biomarker:'PD-L1 TPS ≥ 50%',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.63,ci_low:0.50,ci_high:0.79,pval:'< 0.001',status:'validated',acceptance:'accepted',restrictions:'PD-L1 TPS ≥ 50%; NHS commissioning criteria apply',rationale:'NICE recommends pembrolizumab as an option for untreated PD-L1 positive (TPS ≥ 50%) NSCLC without EGFR or ALK aberrations.',quote:'Pembrolizumab is recommended as an option for untreated PD-L1-positive (with a TPS of 50% or more) locally advanced or metastatic NSCLC in adults.',quotePage:4,extractedAt:'2024-03-12 11:05',model:'gpt-4o-2024-05-13',validatedBy:'Dr. Smith (HEOR)',validatedAt:'2024-03-13 10:17',cP:0.93,cI:0.98,cC:0.95,cO:0.92},
+  {id:'pembrolizumab-gba',drug:'Pembrolizumab',inn:'pembrolizumab',indication:'NSCLC 1L',agency:'G-BA',flag:'🇩🇪',docRef:'GBA-2024-0128',population:'NSCLC non-squamous, no EGFR/ALK, PD-L1 TPS ≥ 50%',biomarker:'PD-L1 TPS ≥ 50%',lot:'1L',intervention:'Pembrolizumab 200mg Q3W',comparator:'Platinum-pemetrexed chemotherapy',comparatorType:'active',hr:0.71,ci_low:0.56,ci_high:0.90,pval:'0.004',status:'draft',acceptance:'restricted',restrictions:'Non-squamous only; TPS ≥ 50%',rationale:'Hinweis auf einen beträchtlichen Zusatznutzen bei Patienten mit nicht-squamösem NSCLC und PD-L1 TPS ≥ 50%.',quote:'Für die Patientengruppe mit nicht-plattenepithelialem NSCLC und TPS ≥ 50% ergibt sich ein Hinweis auf einen beträchtlichen Zusatznutzen.',quotePage:12,extractedAt:'2024-03-14 08:45',model:'gpt-4o-2024-05-13',validatedBy:null,validatedAt:null,cP:0.87,cI:0.96,cC:0.82,cO:0.79},
+  {id:'nivolumab-aemps',drug:'Nivolumab',inn:'nivolumab',indication:'NSCLC 2L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 021/2023',population:'NSCLC post-platinum chemotherapy, PD-L1 ≥ 1%',biomarker:'PD-L1 ≥ 1%',lot:'2L',intervention:'Nivolumab 3mg/kg Q2W',comparator:'Docetaxel 75mg/m² Q3W',comparatorType:'active',hr:0.73,ci_low:0.59,ci_high:0.89,pval:'0.002',status:'validated',acceptance:'accepted',restrictions:null,rationale:'Nivolumab demostró una mejoría estadísticamente significativa en la supervivencia global frente a docetaxel en pacientes previamente tratados con platino.',quote:'Se recomienda nivolumab en segunda línea en pacientes con CPNM avanzado previamente tratados con quimioterapia de platino.',quotePage:6,extractedAt:'2024-03-08 14:22',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-09 16:45',cP:0.89,cI:0.95,cC:0.93,cO:0.91},
+  {id:'nivolumab-nice',drug:'Nivolumab',inn:'nivolumab',indication:'NSCLC 2L',agency:'NICE',flag:'🇬🇧',docRef:'TA 833',population:'NSCLC squamous, post-platinum, all PD-L1 levels',biomarker:'No biomarker restriction',lot:'2L',intervention:'Nivolumab 240mg Q2W',comparator:'Docetaxel 75mg/m² Q3W',comparatorType:'active',hr:0.59,ci_low:0.44,ci_high:0.79,pval:'< 0.001',status:'validated',acceptance:'accepted',restrictions:'Squamous histology only per NHS commissioning',rationale:'NICE recommends nivolumab for previously treated squamous NSCLC, noting superior OS vs docetaxel without PD-L1 restriction.',quote:'Nivolumab is recommended as an option for treating locally advanced or metastatic squamous NSCLC after prior chemotherapy in adults.',quotePage:3,extractedAt:'2024-03-09 10:15',model:'gpt-4o-2024-05-13',validatedBy:'Dr. Smith (HEOR)',validatedAt:'2024-03-10 09:30',cP:0.92,cI:0.97,cC:0.96,cO:0.94},
+  {id:'atezolizumab-aemps',drug:'Atezolizumab',inn:'atezolizumab',indication:'NSCLC 1L',agency:'AEMPS',flag:'🇪🇸',docRef:'IPT 019/2024',population:'NSCLC non-squamous, no EGFR/ALK, PD-L1 TC ≥ 50% or IC ≥ 10%',biomarker:'PD-L1 TC ≥ 50% or IC ≥ 10%',lot:'1L',intervention:'Atezolizumab 1200mg Q3W',comparator:'Platinum-based chemotherapy SoC',comparatorType:'standard_of_care',hr:0.78,ci_low:0.64,ci_high:0.96,pval:'0.018',status:'validated',acceptance:'restricted',restrictions:'High PD-L1 only (TC ≥ 50% or IC ≥ 10%)',rationale:'El beneficio en SG se observó únicamente en la subpoblación con alta expresión de PD-L1.',quote:'El beneficio de atezolizumab se restringe a pacientes con expresión elevada de PD-L1 (TC ≥ 50% o IC ≥ 10%).',quotePage:9,extractedAt:'2024-03-13 16:30',model:'gpt-4o-2024-05-13',validatedBy:'Dr. García (HEOR)',validatedAt:'2024-03-14 11:20',cP:0.85,cI:0.96,cC:0.93,cO:0.87}
+];
+
+const JCA_DATA = {
+  'pembrolizumab-1L': { id:'JCA',flag:'◈',doc:'JCA-2025-ONK-031',status:'validated',acceptance:'accepted',
+    population:{value:'NSCLC stage III/IV, no EGFR/ALK, all histologies',sub:'Consolidated EU scope — 8 PICOs',match:'base'},
+    biomarker:{value:'PD-L1 TPS ≥ 1% + ≥ 50% subgroup',match:'base',note:'Broad scope; countries may restrict'},
+    comparator:{value:'Platinum-based chemotherapy',sub:'all regimens accepted',match:'base'},
+    endpoint:{value:'OS + PFS + HRQoL',sub:'all required at EU level',match:'base'},
+    design:{value:'RCT Phase III',sub:'Multiple trials accepted',match:'base'},
+    restrictions:'EU scope — individual countries add national restrictions'
+  },
+  'nivolumab-2L': { id:'JCA',flag:'◈',doc:'JCA-2025-ONK-018',status:'validated',acceptance:'accepted',
+    population:{value:'NSCLC post-platinum, all histologies',sub:'Consolidated EU scope',match:'base'},
+    biomarker:{value:'No biomarker restriction at EU level',match:'base',note:'Country-level variation persists'},
+    comparator:{value:'Docetaxel or BSC',sub:'country choice',match:'base'},
+    endpoint:{value:'OS + PFS',sub:'both required',match:'base'},
+    design:{value:'RCT Phase III',sub:'CheckMate 017/057',match:'base'},
+    restrictions:'No EU-level restriction'
+  }
+};
+
+const HAS_DATA = {
+  'pembrolizumab-1L': { id:'HAS',flag:'🇫🇷',doc:'CT-17429',status:'validated',acceptance:'restricted',
+    population:{value:'NSCLC stage III/IV, no EGFR/ALK',sub:'ASMR evaluation',match:'diverge',note:'ASMR IV (minor improvement)'},
+    biomarker:{value:'PD-L1 TPS ≥ 50%',match:'diverge',note:'TPS scale (FR)'},
+    comparator:{value:'Platinum-based chemotherapy',sub:'carboplatin/paclitaxel',match:'match'},
+    endpoint:{value:'OS only accepted',sub:'HR 0.63 [0.47–0.86]',match:'diverge',note:'PFS not sufficient for HAS'},
+    design:{value:'RCT Phase III',sub:'KEYNOTE-024',match:'match'},
+    restrictions:'ASMR IV; SMR important with restrictions'
+  },
+  'nivolumab-2L': { id:'HAS',flag:'🇫🇷',doc:'CT-16891',status:'validated',acceptance:'restricted',
+    population:{value:'NSCLC squamous + non-squamous, post-platinum',sub:'separate SMR per histology',match:'diverge',note:'Separate ASMR per subgroup'},
+    biomarker:{value:'No restriction',match:'match'},
+    comparator:{value:'Docetaxel 75mg/m² Q3W',match:'match'},
+    endpoint:{value:'OS primary',sub:'HR 0.71 [0.56–0.89]',match:'match'},
+    design:{value:'RCT Phase III',sub:'CheckMate 017/057',match:'match'},
+    restrictions:'ASMR IV squamous; ASMR V non-squamous'
+  }
+};
+
+const MATRIX_DATA = {
+  'pembrolizumab-1L': {
+    drug:'Pembrolizumab', indication:'NSCLC 1L',
+    agencies:[
+      { id:'AEMPS',flag:'🇪🇸',doc:'IPT 043/2024',status:'validated',acceptance:'accepted',
+        population:{value:'NSCLC stage III/IV, no EGFR/ALK',sub:'n = 305',match:'base'},
+        biomarker:{value:'PD-L1 CPS ≥ 10',match:'diverge',note:'CPS scale — differs from UK/DE',implication:'Dual biomarker testing required: both CPS (ES) and TPS (UK/DE) assays needed'},
+        comparator:{value:'Platinum-based chemotherapy',sub:'carboplatin/paclitaxel',match:'match'},
+        endpoint:{value:'Overall Survival (OS)',sub:'HR 0.69 [0.56–0.85]',match:'match'},
+        design:{value:'RCT Phase III',sub:'KEYNOTE-024 / -042',match:'match'},
+        restrictions:'PD-L1 CPS ≥ 10 only'
+      },
+      { id:'NICE',flag:'🇬🇧',doc:'TA 888',status:'validated',acceptance:'accepted',
+        population:{value:'NSCLC stage III/IV, no EGFR/ALK',sub:'n = 305',match:'base'},
+        biomarker:{value:'PD-L1 TPS ≥ 50%',match:'diverge',note:'TPS scale — higher threshold than ES',implication:'Higher TPS threshold means smaller eligible population in UK'},
+        comparator:{value:'Platinum-based chemotherapy',sub:'carboplatin/paclitaxel',match:'match'},
+        endpoint:{value:'Overall Survival (OS)',sub:'HR 0.63 [0.50–0.79]',match:'match'},
+        design:{value:'RCT Phase III',sub:'KEYNOTE-024',match:'match'},
+        restrictions:'TPS ≥ 50%; NHS commissioning criteria'
+      },
+      { id:'G-BA',flag:'🇩🇪',doc:'GBA-2024-0128',status:'draft',acceptance:'restricted',
+        population:{value:'NSCLC non-squamous only, no EGFR/ALK',sub:'n = 189 (subgroup)',match:'diverge',note:'Squamous excluded',implication:'Decision required: add squamous arm or exclude DE market'},
+        biomarker:{value:'PD-L1 TPS ≥ 50%',match:'diverge',note:'TPS scale (DE)'},
+        comparator:{value:'Platinum-pemetrexed',sub:'non-squamous SoC',match:'diverge',note:'Different SoC from ES/UK',implication:'Second comparator arm required to satisfy G-BA'},
+        endpoint:{value:'OS + PFS required',sub:'HR 0.71 [0.56–0.90]',match:'diverge',note:'PFS additionally required',implication:'PFS must be powered as co-primary endpoint'},
+        design:{value:'RCT Phase III',sub:'KEYNOTE-189',match:'match'},
+        restrictions:'Non-squamous only; TPS ≥ 50%'
+      }
+    ],
+    mcs:{
+      population:'NSCLC stage III/IV, no EGFR/ALK, non-squamous',
+      biomarker:'TPS ≥ 50% (NICE/G-BA) + CPS ≥ 10 (AEMPS) — dual assay required',
+      comparator:'Platinum-based (ES/UK) + pemetrexed combination (DE) — two arms',
+      endpoints:'OS primary (all) + PFS co-primary (G-BA)',
+      coverage:['🇪🇸 AEMPS','🇬🇧 NICE','🇩🇪 G-BA'],
+      partial:[],
+      gap_note:'Squamous subgroup covers ES + UK but not DE. A separate squamous arm covers all three without DE restriction.'
+    },
+    stageRecs:{
+      ph3:{
+        headline:'Your Phase III design has 3 critical decisions before locking the protocol',
+        actions:[
+          {n:'1',text:'<strong>Dual comparator arms:</strong> platinum-based chemo (ES/UK) AND platinum-pemetrexed (DE). Single-arm design will exclude Germany.'},
+          {n:'2',text:'<strong>Power PFS as co-primary:</strong> G-BA requires PFS alongside OS. OS-only design will face restriction in Germany.'},
+          {n:'3',text:'<strong>Plan dual biomarker strategy:</strong> both TPS (NICE/G-BA) and CPS (AEMPS) assays must be pre-specified. Retrospective sub-analyses will not be accepted.'},
+          {n:'4',text:'<strong>Squamous subgroup:</strong> including squamous patients satisfies ES + UK. A separate squamous arm adds Germany. Evaluate cost vs. market size.'}
+        ],
+        warning:'G-BA uses a different comparator (platinum-pemetrexed) than ES/UK (platinum-based). A single-arm trial will fail AMNOG assessment in Germany regardless of OS results.'
+      },
+      prelaunch:{
+        headline:'Current evidence profile supports launch in ES + UK. Germany requires additional data.',
+        actions:[
+          {n:'1',text:'<strong>Launch sequencing:</strong> ES and UK have sufficient evidence for immediate IPT/STA submission. No additional studies required.'},
+          {n:'2',text:'<strong>Germany gap:</strong> non-squamous only restriction and pemetrexed comparator requirement means current evidence package partially satisfies G-BA. Evaluate bridging study.'},
+          {n:'3',text:'<strong>Pricing implication:</strong> G-BA restriction to non-squamous PD-L1 TPS ≥ 50% significantly reduces eligible patient volume. Factor into German price negotiation.'},
+          {n:'4',text:'<strong>France (HAS):</strong> add HAS to agency selection to assess ASMR implications for French market entry.'}
+        ],
+        warning:'Do not submit simultaneously to all markets with identical evidence packages. Tailor each dossier to national PICO specifications.'
+      },
+      dossier:{
+        headline:'Three PICO mismatches require specific narrative strategies per agency',
+        actions:[
+          {n:'1',text:'<strong>AEMPS (Spain):</strong> centre narrative on CPS ≥ 10 subgroup data from KEYNOTE-042. AEMPS has consistently accepted CPS-based biomarker stratification for PD-1 inhibitors.'},
+          {n:'2',text:'<strong>NICE (UK):</strong> TPS ≥ 50% is the accepted threshold. Cost-effectiveness model must use NHS SoC pricing. KEYNOTE-024 is the primary evidence base.'},
+          {n:'3',text:'<strong>G-BA (DE):</strong> AMNOG dossier requires head-to-head benefit vs. pemetrexed combination. Non-squamous restriction must be explicitly framed. Quantify additional benefit.'},
+          {n:'4',text:'<strong>JCA alignment:</strong> if JCA scope is active, ensure all national dossiers are consistent with the consolidated EU PICO — agencies will cross-reference.'}
+        ],
+        warning:'Using the same evidence narrative for all three agencies is the most common avoidable cause of HTA restriction. Each agency reads their own precedents.'
+      },
+      newindication:{
+        headline:'PD-1/PD-L1 precedents across agencies suggest high reusability for adjacent indications',
+        actions:[
+          {n:'1',text:'<strong>Comparator stability:</strong> platinum-based chemotherapy is consistently accepted as SoC comparator for lung oncology across ES/UK. This is likely to hold for adjacent indications.'},
+          {n:'2',text:'<strong>Biomarker strategy:</strong> all three agencies require PD-L1 stratification. Plan new indication trials with same dual-assay approach (CPS + TPS) from Phase II.'},
+          {n:'3',text:'<strong>G-BA divergence persists:</strong> Germany\'s histology-based restrictions and different comparator requirements are likely to replicate in new indications. Budget for separate German evidence strategy.'},
+          {n:'4',text:'<strong>Cross-indication reuse:</strong> OS and PFS data from NSCLC trials can partially support other solid tumour submissions. Identify overlap before commissioning new studies.'}
+        ],
+        warning:null
+      },
+      intelligence:{
+        headline:'3 active divergences between agencies create ongoing competitive intelligence signals',
+        actions:[
+          {n:'1',text:'<strong>Biomarker signal:</strong> AEMPS CPS vs. NICE/G-BA TPS divergence is a known fragmentation point. Monitor whether JCA 2025 scope documents begin harmonising biomarker specifications.'},
+          {n:'2',text:'<strong>Comparator drift:</strong> G-BA\'s use of pemetrexed combination as SoC may shift as new frontline standards emerge. Track G-BA decisions quarterly.'},
+          {n:'3',text:'<strong>JCA impact:</strong> first JCA reports expected 2026. The delta between JCA consolidated PICO and national decisions will define whether this fragmentation persists or narrows.'},
+          {n:'4',text:'<strong>Competitive positioning:</strong> any competitor PD-1 submission to AEMPS or G-BA will reveal updated biomarker thresholds. Set corpus alert for new IPT and G-BA decisions in NSCLC.'}
+        ],
+        warning:null
+      }
+    }
+  },
+  'nivolumab-2L': {
+    drug:'Nivolumab', indication:'NSCLC 2L',
+    agencies:[
+      { id:'AEMPS',flag:'🇪🇸',doc:'IPT 021/2023',status:'validated',acceptance:'accepted',
+        population:{value:'NSCLC post-platinum, all histologies',sub:'PD-L1 ≥ 1%',match:'base'},
+        biomarker:{value:'PD-L1 ≥ 1%',match:'diverge',note:'Low threshold (Spain)',implication:'Low threshold means broader eligible population in ES than UK'},
+        comparator:{value:'Docetaxel 75mg/m² Q3W',match:'match'},
+        endpoint:{value:'Overall Survival (OS)',sub:'HR 0.73 [0.59–0.89]',match:'match'},
+        design:{value:'RCT Phase III',sub:'CheckMate 017/057',match:'match'},
+        restrictions:null
+      },
+      { id:'NICE',flag:'🇬🇧',doc:'TA 833',status:'validated',acceptance:'accepted',
+        population:{value:'NSCLC squamous only, post-platinum',sub:'all PD-L1 levels',match:'diverge',note:'Squamous only (UK)',implication:'Non-squamous patients excluded from NHS funding — significant population gap'},
+        biomarker:{value:'No restriction',match:'diverge',note:'No biomarker required'},
+        comparator:{value:'Docetaxel 75mg/m² Q3W',match:'match'},
+        endpoint:{value:'Overall Survival (OS)',sub:'HR 0.59 [0.44–0.79]',match:'match'},
+        design:{value:'RCT Phase III',sub:'CheckMate 017',match:'match'},
+        restrictions:'Squamous histology only per NHS commissioning'
+      },
+      { id:'G-BA',flag:'🇩🇪',doc:'—',status:'gap',acceptance:'not-evaluated',
+        population:{value:'Not evaluated',match:'gap',implication:'No German evidence base — full AMNOG submission required before DE launch'},
+        biomarker:{value:'—',match:'gap'},
+        comparator:{value:'—',match:'gap'},
+        endpoint:{value:'—',match:'gap'},
+        design:{value:'—',match:'gap'},
+        restrictions:null
+      }
+    ],
+    mcs:{
+      population:'NSCLC squamous + non-squamous, post-platinum',
+      biomarker:'No restriction required (NICE) — PD-L1 ≥ 1% data needed for AEMPS only',
+      comparator:'Docetaxel 75mg/m² Q3W (consistent across ES/UK)',
+      endpoints:'OS primary endpoint sufficient for ES + UK',
+      coverage:['🇪🇸 AEMPS','🇬🇧 NICE'],
+      partial:[],
+      gap_note:'G-BA has not evaluated nivolumab 2L. Full AMNOG submission required before German market entry.'
+    },
+    stageRecs:{
+      ph3:{
+        headline:'ES + UK evidence is sufficient. Germany requires a dedicated submission strategy.',
+        actions:[
+          {n:'1',text:'<strong>Comparator consistency:</strong> docetaxel 75mg/m² Q3W is accepted by both AEMPS and NICE. No comparator arm conflict — single-arm design works for ES/UK.'},
+          {n:'2',text:'<strong>Histology strategy:</strong> include both squamous and non-squamous patients. AEMPS accepts all histologies; NICE restricts to squamous — but non-squamous data strengthens AEMPS dossier.'},
+          {n:'3',text:'<strong>Germany gap:</strong> G-BA has not evaluated nivolumab 2L. A new AMNOG dossier is required. Assess whether G-BA SoC for 2L is still docetaxel or has shifted.'},
+          {n:'4',text:'<strong>Biomarker pre-specification:</strong> AEMPS requires PD-L1 ≥ 1% data. NICE has no restriction. Pre-specify PD-L1 strata from Phase II to enable both submissions.'}
+        ],
+        warning:'NICE covers squamous only. Non-squamous patients in the UK are outside NHS funding scope regardless of trial results. Do not overstate UK market size in your business case.'
+      },
+      prelaunch:{
+        headline:'Launch-ready for ES and UK. Germany is an evidence gap — not a quick fix.',
+        actions:[
+          {n:'1',text:'<strong>Immediate submissions:</strong> current evidence satisfies IPT (AEMPS) and STA (NICE) requirements. Both markets are accessible without additional studies.'},
+          {n:'2',text:'<strong>UK market sizing:</strong> NHS restricts to squamous only — adjust revenue projections accordingly. Non-squamous 2L patients in UK are not addressable with current label.'},
+          {n:'3',text:'<strong>Germany entry decision:</strong> no G-BA precedent means a full AMNOG dossier is required. Timeline: 12–18 months minimum. Evaluate ROI before committing.'},
+          {n:'4',text:'<strong>France:</strong> activate HAS column to assess French market accessibility with current evidence package.'}
+        ],
+        warning:null
+      },
+      dossier:{
+        headline:'Two distinct dossier strategies required — AEMPS and NICE have different population scopes.',
+        actions:[
+          {n:'1',text:'<strong>AEMPS:</strong> all histologies accepted. Lead with PD-L1 ≥ 1% subgroup data (CheckMate 057 non-squamous + CheckMate 017 squamous). Full population narrative.'},
+          {n:'2',text:'<strong>NICE:</strong> squamous only per commissioning policy. CheckMate 017 is the primary evidence base. Do not lead with non-squamous data — it is outside NHS scope.'},
+          {n:'3',text:'<strong>Separate evidence packages:</strong> do not submit the same document to AEMPS and NICE. Population scope is different enough to warrant fully distinct dossiers.'},
+          {n:'4',text:'<strong>G-BA:</strong> no submission possible without dedicated AMNOG dossier. Flag as future milestone.'}
+        ],
+        warning:'AEMPS accepts all histologies; NICE covers squamous only. Submitting a combined-histology narrative to NICE will create confusion with NHS commissioning criteria.'
+      },
+      newindication:{
+        headline:'Strong precedent in 2L NSCLC supports adjacent indication expansion — with caveats.',
+        actions:[
+          {n:'1',text:'<strong>Comparator reuse:</strong> docetaxel as active comparator is well-established in 2L solid tumours. Likely to be accepted in adjacent indications.'},
+          {n:'2',text:'<strong>Histology fragmentation risk:</strong> NICE\'s squamous-only restriction in NSCLC may replicate in other indications with histological heterogeneity. Plan histology-stratified designs.'},
+          {n:'3',text:'<strong>Germany first:</strong> if expanding to a new indication, consider German AMNOG submission as part of the initial launch package — not a follow-on. G-BA\'s absence in 2L NSCLC is a commercial gap.'},
+          {n:'4',text:'<strong>Biomarker strategy:</strong> AEMPS low-threshold approach (PD-L1 ≥ 1%) may indicate Spanish agency preference for broad access. Factor into new indication biomarker design.'}
+        ],
+        warning:null
+      },
+      intelligence:{
+        headline:'NICE histology restriction and G-BA absence are active market intelligence signals.',
+        actions:[
+          {n:'1',text:'<strong>NICE non-squamous gap:</strong> monitor whether any competitor PD-1 inhibitor obtains NICE approval for non-squamous 2L NSCLC. This would signal a policy shift with direct competitive impact.'},
+          {n:'2',text:'<strong>G-BA watch:</strong> if a competitor submits nivolumab or similar checkpoint inhibitor for 2L NSCLC to G-BA, the resulting decision will reveal current German SoC and acceptable endpoints.'},
+          {n:'3',text:'<strong>JCA monitoring:</strong> 2L NSCLC is in scope for JCA oncology assessments from 2025. A JCA scope document for this class would provide the first EU-consolidated PICO for 2L — significant intelligence.'},
+          {n:'4',text:'<strong>AEMPS precedent tracking:</strong> AEMPS\'s broad PD-L1 ≥ 1% threshold is generous compared to EU peers. Monitor whether JCA harmonisation pressure narrows this in future IPTs.'}
+        ],
+        warning:null
+      }
+    }
+  }
+};
+
+/* ── STATE ── */
+let currentStage = null;
+let currentStep = 1;
+const stepsDone = new Set();
+
+const STAGE_META = {
+  ph3:          {icon:'🔬', label:'Phase II → III',   color:'var(--accent)',  bg:'var(--accent-light)'},
+  prelaunch:    {icon:'🚀', label:'Pre-launch',        color:'var(--green)',   bg:'var(--green-bg)'},
+  dossier:      {icon:'📋', label:'Dossier prep',      color:'var(--purple)',  bg:'var(--purple-bg)'},
+  newindication:{icon:'↗',  label:'New indication',    color:'var(--amber)',   bg:'var(--amber-bg)'},
+  intelligence: {icon:'📡', label:'Market intelligence',color:'#0891b2',       bg:'#ecfeff'}
+};
+
+const SCOPE_CONTEXT = {
+  ph3:          'Select every market you are designing the trial for. The analysis will identify where requirements conflict and what design satisfies all of them.',
+  prelaunch:    'Select the markets you are considering for launch. The analysis will show which are immediately accessible and where you have evidence gaps.',
+  dossier:      'Select the agency you are preparing the submission for. Add others to see how their precedents compare.',
+  newindication:'Select markets where you want to expand. The analysis will show which evidence from the parent indication carries over.',
+  intelligence: 'Select any combination of markets to monitor. The analysis will highlight active PICO divergences and signals to watch.'
+};
+
+/* ── HELPERS ── */
+function ab(s){
+  if(s==='accepted') return '<span class="badge badge-green">✓ Accepted</span>';
+  if(s==='restricted') return '<span class="badge badge-amber">⚡ Restricted</span>';
+  if(s==='rejected') return '<span class="badge badge-red">✗ Rejected</span>';
+  return '<span class="badge badge-gray">— Not evaluated</span>';
+}
+function sb(s){
+  if(s==='validated') return '<span class="badge badge-green"><span class="status-dot status-validated"></span>Validated</span>';
+  if(s==='draft') return '<span class="badge badge-amber"><span class="status-dot status-draft"></span>Draft</span>';
+  return '';
+}
+function cc(v){return v>=0.9?'conf-high':v>=0.7?'conf-med':'conf-low';}
+function fl(c){return{AEMPS:'🇪🇸',NICE:'🇬🇧','G-BA':'🇩🇪',HAS:'🇫🇷'}[c]||'';}
+function cellClass(match){
+  if(match==='match') return 'cell-match';
+  if(match==='diverge') return 'cell-diverge';
+  if(match==='gap') return 'cell-gap cell-na';
+  return '';
+}
+
+/* ── NAV ── */
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  const t={
+    browse:['Evidence Browser','12 evidence units · 3 agencies'],
+    gap:['Gap Analysis','Cross-country PICO matrix · strategic recommendations'],
+    ingest:['Document Ingest','7 documents · 6 processed'],
+    detail:['Evidence Detail','PICO + Provenance']
+  };
+  document.getElementById('screen-'+n).classList.add('active');
+  document.getElementById('header-title').textContent=t[n][0];
+  document.getElementById('header-sub').textContent=t[n][1];
+  const m={browse:1,gap:2,ingest:0};
+  if(m[n]!==undefined) document.querySelectorAll('.nav-item')[m[n]].classList.add('active');
+}
+
+/* ── STEPPED WORKFLOW ── */
+function goStep(n){
+  // Can only go to done steps or step 1, or unlock in sequence
+  if(n>1 && !stepsDone.has(n-1) && n!==currentStep+1) return;
+  if(n===2 && !currentStage) return;
+
+  currentStep = n;
+
+  // Update panels
+  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+
+  // Update tabs
+  document.querySelectorAll('.step-tab').forEach((t,i)=>{
+    const idx = i+1;
+    t.classList.remove('active','done','locked');
+    if(idx === n) t.classList.add('active');
+    else if(stepsDone.has(idx)) t.classList.add('done');
+    else if(idx > n && !stepsDone.has(idx)) t.classList.add('locked');
+  });
+
+  // On entering step 3, build matrix
+  if(n===3){ buildMatrix(); stepsDone.add(3); }
+  // On entering step 4, build recommendation
+  if(n===4){ buildRec(); stepsDone.add(4); }
+}
+
+function selectStage(el){
+  document.querySelectorAll('.stage-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  currentStage = el.dataset.stage;
+  stepsDone.add(1);
+  document.getElementById('step1-next').disabled = false;
+
+  // Update scope context note when they go to step 2
+  document.getElementById('scope-context-text').textContent = SCOPE_CONTEXT[currentStage];
+
+  // Update tab 1 to done
+  document.getElementById('stab-1').classList.remove('active');
+  document.getElementById('stab-1').classList.add('done');
+  document.getElementById('stab-2').classList.remove('locked');
+}
+
+function toggleAgency(el){
+  const pills = document.querySelectorAll('.agency-pill:not(.jca-pill)');
+  const activeNonJca = [...pills].filter(p=>p.classList.contains('active'));
+  if(!el.classList.contains('jca-pill') && el.classList.contains('active') && activeNonJca.length<=1) return;
+  el.classList.toggle('active');
+}
+
+function getSelectedAgencies(){
+  return [...document.querySelectorAll('.agency-pill.active')].map(p=>p.dataset.id);
+}
+
+/* ── BROWSE ── */
+function renderBrowse(){
+  document.getElementById('browse-body').innerHTML=EU.map(eu=>`
+    <tr onclick="showDetail('${eu.id}')">
+      <td><div class="drug-chip">${eu.drug}</div><div class="indication-chip">${eu.indication}</div></td>
+      <td><div class="agency-tag">${eu.flag} ${eu.agency}</div></td>
+      <td style="max-width:220px"><div style="font-size:11px;color:var(--text2);line-height:1.4">${eu.population}</div>${eu.biomarker!=='No biomarker restriction'?`<span class="badge badge-amber" style="margin-top:4px;font-size:9px">${eu.biomarker}</span>`:''}</td>
+      <td>${eu.comparator.split(' ').slice(0,3).join(' ')}...</td>
+      <td><span class="hr-value">${eu.hr}</span> <span class="ci-value">[${eu.ci_low}–${eu.ci_high}]</span></td>
+      <td>${ab(eu.acceptance)}</td>
+      <td><button class="btn btn-ghost btn-sm">View →</button></td>
+    </tr>`).join('');
+}
+
+/* ── DETAIL ── */
+function showDetail(id){
+  const eu=EU.find(e=>e.id===id); if(!eu) return;
+  document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px">${eu.drug} · ${eu.indication}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="agency-tag">${eu.flag} ${eu.agency}</div>
+          <span class="mono" style="color:var(--text3)">${eu.docRef}</span>
+          ${sb(eu.status)} ${ab(eu.acceptance)}
+        </div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-card-header">Population <span><span class="conf-dot ${cc(eu.cP)}"></span> ${Math.round(eu.cP*100)}%</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Definition</span><span class="detail-field-value">${eu.population}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Biomarker</span><span class="detail-field-value" style="color:var(--amber)">${eu.biomarker}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Line</span><span class="detail-field-value">${eu.lot}</span></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Intervention <span><span class="conf-dot ${cc(eu.cI)}"></span> ${Math.round(eu.cI*100)}%</span></div>
+        <div class="detail-card-body"><div class="detail-field"><span class="detail-field-label">Drug + regimen</span><span class="detail-field-value">${eu.intervention}</span></div></div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Comparator <span><span class="conf-dot ${cc(eu.cC)}"></span> ${Math.round(eu.cC*100)}%</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Comparator</span><span class="detail-field-value">${eu.comparator}</span></div>
+          <div class="detail-field"><span class="detail-field-label">Type</span><span class="detail-field-value">${eu.comparatorType.replace('_',' ')}</span></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-header">Primary Outcome (OS) <span><span class="conf-dot ${cc(eu.cO)}"></span> ${Math.round(eu.cO*100)}%</span></div>
+        <div class="detail-card-body">
+          <div class="detail-field"><span class="detail-field-label">Hazard ratio</span><span class="detail-field-value"><span class="hr-value">${eu.hr}</span> <span class="ci-value">[${eu.ci_low}–${eu.ci_high}]</span></span></div>
+          <div class="detail-field"><span class="detail-field-label">p-value</span><span class="detail-field-value mono">${eu.pval}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="acceptance-panel">
+      <div class="full-card-header">◎ Agency acceptance</div>
+      <div class="acceptance-row">
+        <div class="acceptance-agency"><div class="agency-tag">${eu.flag} ${eu.agency}</div></div>
+        <div class="acceptance-status-cell">${ab(eu.acceptance)}</div>
+        <div class="acceptance-detail">${eu.restrictions?`<span class="restriction-tag">⚡ ${eu.restrictions}</span><br><br>`:''}${eu.rationale}</div>
+      </div>
+    </div>
+    <div class="full-card">
+      <div class="full-card-header">↗ Provenance & audit trail</div>
+      <div class="prov-timeline">
+        <div class="prov-item"><div class="prov-dot"></div><div><div class="prov-action">Extracted by LLM</div><div class="prov-meta">${eu.model} · ${eu.extractedAt}</div><div class="prov-quote">"${eu.quote}" <span style="color:var(--text3)">— p.${eu.quotePage}</span></div></div></div>
+        ${eu.validatedBy
+          ?`<div class="prov-item"><div class="prov-dot" style="background:var(--green)"></div><div><div class="prov-action">Validated by human reviewer</div><div class="prov-meta">${eu.validatedBy} · ${eu.validatedAt}</div></div></div>`
+          :`<div class="prov-item"><div class="prov-dot" style="background:var(--amber)"></div><div><div class="prov-action">Awaiting human validation</div><div class="prov-meta">No reviewer assigned yet</div></div></div>`}
+      </div>
+    </div>`;
+  showScreen('detail');
+}
+
+/* ── BUILD MATRIX (Step 3) ── */
+function buildMatrix(){
+  const key = document.getElementById('gap-drug').value;
+  const D = MATRIX_DATA[key];
+  if(!D){ document.getElementById('matrix-area').innerHTML=''; return; }
+
+  const selected = getSelectedAgencies();
+  const showJCA = selected.includes('JCA');
+  const nationalIds = selected.filter(s=>s!=='JCA');
+
+  let agencies = D.agencies.filter(a=>nationalIds.includes(a.id));
+  if(nationalIds.includes('HAS') && HAS_DATA[key]) agencies = [...agencies, HAS_DATA[key]];
+  const allColumns = showJCA ? [{...JCA_DATA[key], isJCA:true}, ...agencies] : agencies;
+
+  const matchCount = agencies.filter(a=>a.comparator.match==='match'&&a.endpoint.match==='match').length;
+  const divergeCount = agencies.reduce((n,a)=>n+[a.biomarker,a.population,a.comparator,a.endpoint,a.design].filter(f=>f&&f.match==='diverge').length,0);
+  const gapCount = agencies.filter(a=>a.acceptance==='not-evaluated').length;
+  const gridTpl = `130px ${allColumns.map(()=>'1fr').join(' ')}`;
+
+  const PICO_ROWS = [
+    {key:'population',label:'Population'},
+    {key:'biomarker', label:'Biomarker'},
+    {key:'comparator',label:'Comparator'},
+    {key:'endpoint',  label:'Primary endpoint'},
+    {key:'design',    label:'Study design'},
+  ];
+
+  const agencyHeaders = allColumns.map(a=>`
+    <div class="matrix-header-cell agency-col" style="${a.isJCA?'background:#eff4ff;border-bottom:2px solid var(--accent)':''}">
+      <span>${a.flag}</span>
+      <div>
+        <div style="color:${a.isJCA?'var(--accent)':'var(--text)'};font-weight:600;font-size:12px">${a.id}</div>
+        <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">${a.doc}</div>
+      </div>
+      <div style="margin-left:auto">${a.acceptance==='not-evaluated'?'<span class="badge badge-gray">—</span>':ab(a.acceptance)}</div>
+    </div>`).join('');
+
+  const bodyRows = PICO_ROWS.map(row=>{
+    const cells = allColumns.map(a=>{
+      const f = a[row.key];
+      if(!f||f.value==='—') return `<div class="matrix-cell cell-na"><span style="color:var(--text3);font-size:11px;font-style:italic">Not evaluated</span></div>`;
+      const isJcaCol = a.isJCA;
+      const cellCls = isJcaCol ? 'cell-jca' : cellClass(f.match);
+      return `<div class="matrix-cell ${cellCls}">
+        <span class="cell-value">${f.value}</span>
+        ${f.sub?`<span class="cell-sub">${f.sub}</span>`:''}
+        ${f.note?`<span class="cell-sub" style="color:${isJcaCol?'var(--accent)':'var(--amber)'};font-style:italic">${f.note}</span>`:''}
+        ${isJcaCol?'<span class="jca-flag">◈ EU reference</span>':''}
+        ${!isJcaCol&&f.match==='match'?'<span class="match-flag">✓ aligned</span>':''}
+        ${!isJcaCol&&f.match==='diverge'?'<span class="diverge-flag">⚡ diverges</span>':''}
+        ${!isJcaCol&&f.match==='gap'?'<span class="gap-flag">✗ not evaluated</span>':''}
+        ${!isJcaCol&&f.implication?`<div class="cell-implication"><strong>→</strong> ${f.implication}</div>`:''}
+      </div>`;
+    }).join('');
+    return `<div class="matrix-row" style="display:grid;grid-template-columns:${gridTpl}">
+      <div class="matrix-cell pico-label">${row.label}</div>${cells}
+    </div>`;
+  }).join('');
+
+  const restrictionRow = `<div class="matrix-row" style="display:grid;grid-template-columns:${gridTpl};background:var(--surface2)">
+    <div class="matrix-cell pico-label">Restrictions</div>
+    ${allColumns.map(a=>`<div class="matrix-cell" style="${a.isJCA?'background:#eff4ff':''}">
+      ${a.restrictions?`<span class="restriction-tag">⚡ ${a.restrictions}</span>`:`<span style="color:var(--text3);font-size:11px">None</span>`}
+    </div>`).join('')}
+  </div>`;
+
+  const jcaBanner = showJCA ? `<div class="jca-banner">◈ <strong>JCA column active</strong> — EU consolidated PICO shown as reference. National column colours show divergence from EU scope.</div>` : '';
+
+  document.getElementById('matrix-area').innerHTML=`
+    ${jcaBanner}
+    <div class="gap-summary-bar">
+      <div class="summary-pill"><div class="summary-pill-value">${agencies.length}${showJCA?' +JCA':''}</div><div class="summary-pill-label">Agencies</div></div>
+      <div class="summary-pill ${matchCount===agencies.length?'highlight':''}"><div class="summary-pill-value">${matchCount}</div><div class="summary-pill-label">Fully aligned</div></div>
+      <div class="summary-pill ${divergeCount>0?'warn':''}"><div class="summary-pill-value">${divergeCount}</div><div class="summary-pill-label">Divergences</div></div>
+      <div class="summary-pill ${gapCount>0?'danger':''}"><div class="summary-pill-value">${gapCount}</div><div class="summary-pill-label">Evidence gaps</div></div>
+    </div>
+    <div class="matrix-legend">
+      <span style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-right:4px">Legend</span>
+      <div class="legend-item"><div class="legend-dot legend-dot-match"></div> Aligned</div>
+      <div class="legend-item"><div class="legend-dot legend-dot-diverge"></div> Diverges — action required</div>
+      <div class="legend-item"><div class="legend-dot legend-dot-gap"></div> Not evaluated</div>
+      ${showJCA?'<div class="legend-item"><div class="legend-dot legend-dot-jca"></div> JCA EU reference</div>':''}
+    </div>
+    <div class="matrix-wrap">
+      <div class="matrix-header-row" style="display:grid;grid-template-columns:${gridTpl}">
+        <div class="matrix-header-cell">PICO dimension</div>${agencyHeaders}
+      </div>
+      ${bodyRows}${restrictionRow}
+    </div>`;
+}
+
+/* ── BUILD RECOMMENDATION (Step 4) ── */
+function buildRec(){
+  const key = document.getElementById('gap-drug').value;
+  const D = MATRIX_DATA[key];
+  if(!D||!currentStage) return;
+
+  const rec = D.stageRecs[currentStage];
+  const meta = STAGE_META[currentStage];
+  const selected = getSelectedAgencies().filter(s=>s!=='JCA');
+
+  const mcsCoverage = D.mcs.coverage
+    .filter(c=>selected.some(id=>c.includes(id)))
+    .map(c=>`<span class="coverage-agency coverage-ok">✓ ${c}</span>`).join('')
+    + D.mcs.partial.map(c=>`<span class="coverage-agency coverage-partial">~ ${c}</span>`).join('');
+
+  document.getElementById('rec-area').innerHTML=`
+    <div class="rec-panel" style="border-color:${meta.color}20">
+      <div class="rec-header" style="background:${meta.bg}">
+        <div class="rec-header-icon">${meta.icon}</div>
+        <div class="rec-header-content">
+          <div class="rec-header-title">${rec.headline}</div>
+          <span class="rec-header-stage" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.color}40">${meta.icon} ${meta.label}</span>
+        </div>
+      </div>
+      <div class="mcs-section">
+        <div class="mcs-section-title">Minimum covering evidence set — satisfies all selected markets</div>
+        <div class="mcs-grid">
+          <div class="mcs-field"><div class="mcs-field-label">Population</div><div class="mcs-field-value">${D.mcs.population}</div></div>
+          <div class="mcs-field"><div class="mcs-field-label">Biomarker</div><div class="mcs-field-value">${D.mcs.biomarker}</div></div>
+          <div class="mcs-field"><div class="mcs-field-label">Comparator</div><div class="mcs-field-value">${D.mcs.comparator}</div></div>
+          <div class="mcs-field"><div class="mcs-field-label">Endpoints</div><div class="mcs-field-value">${D.mcs.endpoints}</div></div>
+        </div>
+        <div class="mcs-coverage"><span class="mcs-coverage-label">Covers:</span>${mcsCoverage}</div>
+      </div>
+      <div class="rec-actions">
+        <div class="rec-action-label">Strategic actions for ${meta.label}</div>
+        ${rec.actions.map(a=>`
+          <div class="rec-action-item">
+            <div class="rec-action-num">${a.n}</div>
+            <div>${a.text}</div>
+          </div>`).join('')}
+      </div>
+      ${rec.warning?`<div class="rec-warning rec-warning-amber">⚠ ${rec.warning}</div>`:''}
+      ${D.mcs.gap_note?`<div class="rec-warning rec-warning-amber">⚡ ${D.mcs.gap_note}</div>`:''}
+    </div>`;
+}
+
+/* ── INIT ── */
+renderBrowse();
+showScreen('gap');
+
+
+</script>
+</body>
+</html>
+
+</script>
+</body>
+</html>
