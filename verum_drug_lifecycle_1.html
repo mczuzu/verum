@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drug Lifecycle Intelligence Map — Verum</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0d0f12;
+  color: #e8e6e0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.page-header {
+  padding: 32px 40px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-header h1 { font-size: 20px; font-weight: 500; color: #e8e6e0; margin-bottom: 4px; }
+.page-header .sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #6a6860; letter-spacing: 0.3px; }
+
+.legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.leg { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #7a7870; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.notice {
+  margin: 20px 40px;
+  background: rgba(200,169,110,0.07);
+  border: 1px solid rgba(200,169,110,0.2);
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-size: 12.5px;
+  color: rgba(232,230,224,0.8);
+  line-height: 1.6;
+}
+.notice strong { color: #c8a96e; font-weight: 500; }
+
+.wrap { padding: 0 40px 60px; overflow-x: auto; }
+
+table { border-collapse: collapse; min-width: 1600px; width: 100%; margin-top: 20px; }
+
+td.rh, th.rh {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #6a6860;
+  background: #111318;
+  padding: 10px 14px;
+  white-space: nowrap;
+  border: 1px solid rgba(255,255,255,0.06);
+  min-width: 110px;
+  vertical-align: middle;
+  font-weight: 500;
+}
+
+th.ph {
+  padding: 12px 12px 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: #13161b;
+  vertical-align: top;
+  min-width: 150px;
+}
+
+th.ph .pnum { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.4px; margin-bottom: 4px; }
+th.ph .pname { font-size: 12px; font-weight: 500; color: #e8e6e0; line-height: 1.3; margin-bottom: 3px; }
+th.ph .pdur { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5a5856; margin-top: 3px; }
+
+td.dc {
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: #0f1217;
+  vertical-align: top;
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(232,230,224,0.82);
+}
+
+td.dc.alt { background: #111318; }
+
+.chip {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 1px 2px 1px 0;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #7a7870;
+  background: rgba(255,255,255,0.04);
+  white-space: nowrap;
+}
+.chip.open    { color: #4e9e8c; border-color: rgba(78,158,140,0.4); background: rgba(78,158,140,0.07); }
+.chip.partial { color: #c89060; border-color: rgba(200,140,70,0.35); background: rgba(200,140,70,0.06); }
+.chip.locked  { color: #c87070; border-color: rgba(200,90,90,0.35); background: rgba(200,90,90,0.06); }
+
+.stake {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin: 1px 2px 1px 0;
+  white-space: nowrap;
+}
+.s-rd   { background: rgba(78,120,180,0.15); color: #7aabde; border: 1px solid rgba(78,120,180,0.3); }
+.s-heor { background: rgba(200,169,110,0.15); color: #c8a96e; border: 1px solid rgba(200,169,110,0.3); }
+.s-reg  { background: rgba(140,100,180,0.15); color: #b090d8; border: 1px solid rgba(140,100,180,0.3); }
+.s-ma   { background: rgba(78,158,140,0.15); color: #4e9e8c; border: 1px solid rgba(78,158,140,0.3); }
+.s-med  { background: rgba(180,90,90,0.15); color: #d88080; border: 1px solid rgba(180,90,90,0.3); }
+.s-pv   { background: rgba(120,140,80,0.15); color: #a8bc70; border: 1px solid rgba(120,140,80,0.3); }
+.s-bd   { background: rgba(160,120,60,0.15); color: #d0a060; border: 1px solid rgba(160,120,60,0.3); }
+
+.covrow { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.covbar { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.covfill { height: 100%; border-radius: 3px; }
+.covlbl { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #6a6860; white-space: nowrap; }
+
+.vbadge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+.vb1    { background: rgba(78,158,140,0.15); color: #4e9e8c; border: 1px solid rgba(78,158,140,0.35); }
+.vb2    { background: rgba(200,169,110,0.15); color: #c8a96e; border: 1px solid rgba(200,169,110,0.35); }
+.vbnone { background: rgba(90,88,86,0.12); color: #5a5856; border: 1px solid rgba(90,88,86,0.2); }
+
+.italic { font-style: italic; color: rgba(232,230,224,0.65); font-size: 11.5px; }
+
+::-webkit-scrollbar { height: 5px; width: 5px; }
+::-webkit-scrollbar-track { background: #0d0f12; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>Drug Lifecycle Intelligence Map</h1>
+    <div class="sub">VERUM · Strategic Framework · March 2026 · Where evidence intelligence creates value</div>
+  </div>
+  <div class="legend">
+    <div class="leg"><div class="dot" style="background:#c8a96e"></div>Verum V2 opportunity</div>
+    <div class="leg"><div class="dot" style="background:#4e9e8c"></div>Verum V1 baseline</div>
+    <div class="leg"><div class="dot" style="background:#5a5856"></div>Out of scope</div>
+    <div class="leg">
+      <div style="width:28px;height:5px;border-radius:3px;background:linear-gradient(90deg,#c85a5a,#c8a040,#4e9e8c)"></div>
+      Coverage low → high
+    </div>
+    <div class="leg">
+      <span class="chip open" style="margin:0">open</span>
+      <span class="chip partial" style="margin:0 0 0 4px">partial</span>
+      <span class="chip locked" style="margin:0 0 0 4px">restricted</span>
+      data access
+    </div>
+  </div>
+</div>
+
+<div class="notice">
+  <strong>Product strategist note:</strong> The standard 4-phase clinical trial framing misses where the real commercial evidence decisions happen. This map adds <strong>2 pre-trial phases</strong> (Target Selection → Evidence Strategy) and <strong>3 post-approval phases</strong> (HTA Submission → Pricing &amp; Reimbursement → Post-market / Label Extension). These 5 phases are where HEOR teams spend disproportionate time and where current tooling is weakest. <strong>Verum's leverage sits almost entirely in this expanded perimeter</strong> — not inside the clinical trial itself.
+</div>
+
+<div class="wrap">
+<table>
+<thead>
+<tr>
+  <th class="rh" style="background:#0d0f12;border:none"></th>
+  <th class="ph" style="border-top:3px solid #5a5a7a">
+    <div class="pnum" style="color:#7a7a9a">PRE-01</div>
+    <div class="pname">Target &amp; Indication Selection</div>
+    <div class="pdur">Years 1–3</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #4e78b4">
+    <div class="pnum" style="color:#4e78b4">PRE-02</div>
+    <div class="pname">Evidence Strategy &amp; PICO Planning</div>
+    <div class="pdur">End of Phase II</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #4e8ca0">
+    <div class="pnum" style="color:#4e8ca0">PHASE I</div>
+    <div class="pname">First-in-Human Safety</div>
+    <div class="pdur">1–2 yrs · 20–100 subjects</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #4e9e8c">
+    <div class="pnum" style="color:#4e9e8c">PHASE II</div>
+    <div class="pname">Proof of Concept &amp; Dose Finding</div>
+    <div class="pdur">2–3 yrs · 100–500 patients</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #64a050">
+    <div class="pnum" style="color:#64a050">PHASE III</div>
+    <div class="pname">Pivotal Efficacy Trial</div>
+    <div class="pdur">3–5 yrs · 500–5,000 patients</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #8ca040">
+    <div class="pnum" style="color:#8ca040">REG</div>
+    <div class="pname">Regulatory Submission</div>
+    <div class="pdur">12–18 months review</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #c8a96e">
+    <div class="pnum" style="color:#c8a96e">HTA</div>
+    <div class="pname">HTA Submission &amp; Assessment</div>
+    <div class="pdur">3–18 months per country</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #c88250">
+    <div class="pnum" style="color:#c88250">P&amp;R</div>
+    <div class="pname">Pricing &amp; Reimbursement</div>
+    <div class="pdur">6–24 months per country</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #b45a5a">
+    <div class="pnum" style="color:#b45a5a">POST</div>
+    <div class="pname">Post-Approval &amp; RWE</div>
+    <div class="pdur">Ongoing (Phase IV)</div>
+  </th>
+  <th class="ph" style="border-top:3px solid #7850a0">
+    <div class="pnum" style="color:#7850a0">EXT</div>
+    <div class="pname">Label Extension / New Indication</div>
+    <div class="pdur">New cycle restarts</div>
+  </th>
+</tr>
+</thead>
+<tbody>
+
+<!-- WHO DOES WHAT -->
+<tr>
+  <td class="rh">Who does what</td>
+  <td class="dc">
+    <span class="stake s-rd">R&amp;D</span> selects target<br>
+    <span class="stake s-bd">Business Dev</span> validates commercial case<br>
+    <span class="stake s-heor">HEOR</span> early landscape scan
+  </td>
+  <td class="dc alt">
+    <span class="stake s-heor">HEOR</span> leads evidence strategy<br>
+    <span class="stake s-ma">Market Access</span> country requirements<br>
+    <span class="stake s-rd">R&amp;D / Clinical Dev</span> trial design alignment
+  </td>
+  <td class="dc">
+    <span class="stake s-rd">Clinical Dev</span> runs trial<br>
+    <span class="stake s-reg">Regulatory</span> IND/CTA filing<br>
+    <span class="stake s-heor">HEOR</span> not yet involved
+  </td>
+  <td class="dc alt">
+    <span class="stake s-rd">Clinical Dev</span> leads<br>
+    <span class="stake s-heor">HEOR</span> endpoint alignment check<br>
+    <span class="stake s-ma">Market Access</span> first HTA signal
+  </td>
+  <td class="dc">
+    <span class="stake s-rd">Clinical Dev</span> trial execution<br>
+    <span class="stake s-heor">HEOR</span> SLR &amp; comparator evidence<br>
+    <span class="stake s-med">Medical Affairs</span> publication strategy<br>
+    <span class="stake s-reg">Regulatory</span> protocol approval
+  </td>
+  <td class="dc alt">
+    <span class="stake s-reg">Regulatory Affairs</span> leads<br>
+    <span class="stake s-heor">HEOR</span> clinical overview sections<br>
+    <span class="stake s-rd">Clinical Dev</span> data package assembly
+  </td>
+  <td class="dc">
+    <span class="stake s-heor">HEOR</span> builds dossier<br>
+    <span class="stake s-reg">Regulatory</span> submission management<br>
+    <span class="stake s-ma">Market Access</span> country strategy<br>
+    <span class="stake s-med">Medical Affairs</span> clinical sign-off
+  </td>
+  <td class="dc alt">
+    <span class="stake s-ma">Market Access</span> leads negotiation<br>
+    <span class="stake s-heor">HEOR</span> economic modelling<br>
+    <span class="stake s-bd">Pricing team</span> value story<br>
+    <span class="stake s-reg">Regulatory</span> label review
+  </td>
+  <td class="dc">
+    <span class="stake s-med">Medical Affairs</span> leads RWE<br>
+    <span class="stake s-pv">Pharmacovigilance</span> safety monitoring<br>
+    <span class="stake s-heor">HEOR</span> real-world study design
+  </td>
+  <td class="dc alt">
+    <span class="stake s-heor">HEOR</span> new evidence gap analysis<br>
+    <span class="stake s-rd">R&amp;D / Clinical Dev</span> new trial<br>
+    <span class="stake s-ma">Market Access</span> new country strategy<br>
+    <span class="stake s-bd">Business Dev</span> indication portfolio
+  </td>
+</tr>
+
+<!-- JTBD -->
+<tr>
+  <td class="rh">JTBD</td>
+  <td class="dc"><span class="italic">"Which indication gives this molecule the highest probability of clinical success and commercial return?"</span></td>
+  <td class="dc alt"><span class="italic">"Design a Phase III that satisfies all target HTA agencies simultaneously — without running separate studies per country."</span></td>
+  <td class="dc"><span class="italic">"Is this molecule safe in humans? What dose range is viable before we invest further?"</span></td>
+  <td class="dc alt"><span class="italic">"Does this drug actually work? Which population and dose before the €300M Phase III commitment?"</span></td>
+  <td class="dc"><span class="italic">"Generate definitive efficacy evidence against the accepted comparator. This trial IS the HTA dossier."</span></td>
+  <td class="dc alt"><span class="italic">"Get marketing authorisation. Demonstrate safety and efficacy to the standard required for approval — not reimbursement."</span></td>
+  <td class="dc"><span class="italic">"Translate clinical evidence into country-specific dossiers. AEMPS, NICE, G-BA — each with different comparators, populations, and endpoint hierarchies."</span></td>
+  <td class="dc alt"><span class="italic">"Negotiate reimbursement price and conditions. Demonstrate value for money. Secure patient access."</span></td>
+  <td class="dc"><span class="italic">"Demonstrate real-world effectiveness to defend reimbursement. Meet managed entry agreement obligations."</span></td>
+  <td class="dc alt"><span class="italic">"Reuse prior evidence for a new population. Compress timelines by not rebuilding from scratch."</span></td>
+</tr>
+
+<!-- DATA SOURCES -->
+<tr>
+  <td class="rh">Data sources</td>
+  <td class="dc">
+    <span class="chip open">PubMed</span><span class="chip open">ClinicalTrials.gov</span><span class="chip locked">Citeline</span><span class="chip locked">Evaluate Pharma</span><span class="chip open">Patent DBs</span>
+  </td>
+  <td class="dc alt">
+    <span class="chip open">AEMPS IPTs</span><span class="chip open">NICE STAs</span><span class="chip open">G-BA decisions</span><span class="chip open">HAS decisions</span><span class="chip open">JCA scope docs</span><span class="chip open">HTACG guidance</span><span class="chip open">EMA EPARs</span>
+  </td>
+  <td class="dc">
+    <span class="chip open">Internal trial data</span><span class="chip open">ClinicalTrials.gov</span><span class="chip open">EudraCT / CTIS</span><span class="chip open">PubMed</span>
+  </td>
+  <td class="dc alt">
+    <span class="chip open">Internal trial data</span><span class="chip open">ClinicalTrials.gov</span><span class="chip open">PubMed</span><span class="chip partial">Patient registries</span>
+  </td>
+  <td class="dc">
+    <span class="chip open">Internal trial CSR</span><span class="chip open">PubMed</span><span class="chip locked">Embase (mandatory)</span><span class="chip partial">Cochrane</span><span class="chip open">ClinicalTrials.gov</span><span class="chip partial">PRO instruments</span>
+  </td>
+  <td class="dc alt">
+    <span class="chip open">EMA IRIS portal</span><span class="chip open">Internal CSR</span><span class="chip open">Prior EPARs</span><span class="chip open">FDA.gov</span>
+  </td>
+  <td class="dc">
+    <span class="chip open">AEMPS IPT template</span><span class="chip open">NICE sub. template</span><span class="chip open">G-BA dossier template</span><span class="chip open">JCA scope document</span><span class="chip partial">Health economic models</span><span class="chip open">Agency guidelines</span>
+  </td>
+  <td class="dc alt">
+    <span class="chip open">HTA agency output</span><span class="chip partial">Epidemiology data</span><span class="chip partial">Budget impact models</span><span class="chip locked">CIPM pricing (Spain)</span><span class="chip partial">NHS England data</span><span class="chip partial">RWE registries</span>
+  </td>
+  <td class="dc">
+    <span class="chip partial">EHR / claims DBs</span><span class="chip partial">Patient registries</span><span class="chip locked">IQVIA RWE / Flatiron</span><span class="chip open">EMA pharmacovigilance</span><span class="chip open">PubMed (RWE pubs)</span>
+  </td>
+  <td class="dc alt">
+    <span class="chip open">Existing EvidenceUnits</span><span class="chip partial">New RCT / RWE data</span><span class="chip open">Prior HTA decisions</span><span class="chip partial">New indication comparators</span>
+  </td>
+</tr>
+
+<!-- PHASE OUTPUT -->
+<tr>
+  <td class="rh">Phase output</td>
+  <td class="dc">Target Product Profile (TPP). Indication prioritization matrix. Go/no-go decision.</td>
+  <td class="dc alt">Evidence generation plan (EGP). Target PICO per country. Endpoint hierarchy. Country gap analysis. Trial design brief.</td>
+  <td class="dc">Safety profile. Max tolerated dose (MTD). PK/PD data. Phase II go/no-go.</td>
+  <td class="dc alt">Efficacy signal. Dose recommendation. Refined patient population definition. Phase III protocol draft.</td>
+  <td class="dc">Clinical Study Report (CSR). Integrated summary of efficacy &amp; safety. SLR of comparator evidence. Full data package for MAA/NDA.</td>
+  <td class="dc alt">Marketing Authorisation (MA). EPAR published. Summary of Product Characteristics (SmPC). Approved label.</td>
+  <td class="dc">Country HTA dossiers (IPT, STA, AMNOG). Evidence tables. Health economic model. JCA dossier (EU). Full citation trail.</td>
+  <td class="dc alt">Reimbursement decision. Negotiated price. Restricted access criteria (if any). Managed Entry Agreement (MEA).</td>
+  <td class="dc">Real-world evidence studies. MEA outcome reports. Label extension data packages. Pharmacovigilance reports.</td>
+  <td class="dc alt">New indication dossier. Updated EvidenceUnits. Cross-indication evidence reuse map. New country submission.</td>
+</tr>
+
+<!-- EVIDENCE PROCESS -->
+<tr>
+  <td class="rh">Evidence process</td>
+  <td class="dc">Competitive landscape scan. Unmet need assessment. Mechanism of action comparison. Indication-level epidemiology sizing.</td>
+  <td class="dc alt">Mine HTA decisions for implied PICO per country. Cross-country comparator alignment. Endpoint divergence analysis. JCA PICO simulation. Evidence gap map.</td>
+  <td class="dc">Dose-escalation design. Adverse event monitoring. PK/PD modelling. IND/CTA regulatory submission.</td>
+  <td class="dc alt">Controlled trial design. Endpoint selection. Subgroup exploration. Indirect comparison with SoC. First HTA endpoint alignment check.</td>
+  <td class="dc">Randomised controlled trial. Pre-specified subgroup analyses. Network meta-analysis (NMA). Full SLR of evidence base. GRADE assessment of quality.</td>
+  <td class="dc alt">CTD/eCTD dossier assembly. Agency questions (Day 120/180). Risk management plan (RMP). Benefit-risk analysis.</td>
+  <td class="dc">Evidence localisation per country framework. EvidenceUnit → section mapping. Citation trail generation. GRADE quality assessment. Economic modelling. SLR update (max 3 months for JCA).</td>
+  <td class="dc alt">Cost-effectiveness analysis (CEA). Budget impact analysis (BIA). Value-based pricing negotiation. Patient access scheme design.</td>
+  <td class="dc">Observational study design. Propensity score matching. Registry analysis. Safety signal monitoring. New SLR for label expansion.</td>
+  <td class="dc alt">Evidence reuse assessment vs new PICO. Delta SLR (new evidence only). Localisation for new country set. Cross-indication overlap analysis.</td>
+</tr>
+
+<!-- TOOL COVERAGE -->
+<tr>
+  <td class="rh">Tool coverage</td>
+  <td class="dc">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:10%;background:#c85a5a"></div></div><span class="covlbl">Very low · 10%</span></div>
+    Citeline, Pharmaprojects, Evaluate (expensive, analyst-driven). No structured indication-PICO alignment tool.
+  </td>
+  <td class="dc alt">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:12%;background:#c85a5a"></div></div><span class="covlbl">Critical gap · 12%</span></div>
+    Manual consulting (€50–200K, weeks). EVERSANA NAVLIN (partial, proprietary model). No public-corpus mining tool exists.
+  </td>
+  <td class="dc">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:72%;background:#4e9e8c"></div></div><span class="covlbl">Well served · 72%</span></div>
+    Medidata, Veeva Vault, CTMS platforms. Strong tooling. HEOR barely involved at this stage.
+  </td>
+  <td class="dc alt">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:55%;background:#c8a040"></div></div><span class="covlbl">Partial · 55%</span></div>
+    eClinical platforms. Covidence/DistillerSR for SLR. No HTA-aligned endpoint planning tool for this stage.
+  </td>
+  <td class="dc">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:72%;background:#4e9e8c"></div></div><span class="covlbl">Well served · 72%</span></div>
+    Medidata, Veeva, DistillerSR, Covidence, EPPI-Reviewer. Most crowded segment in pharma tech.
+  </td>
+  <td class="dc alt">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:75%;background:#4e9e8c"></div></div><span class="covlbl">Well served · 75%</span></div>
+    Veeva Vault Regulatory. PAREXEL, Syneos CRO support. Strong tooling exists. Entirely separate from HTA workflow.
+  </td>
+  <td class="dc">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:12%;background:#c85a5a"></div></div><span class="covlbl">Critical gap · 12%</span></div>
+    Word/Excel manual workflows dominant. DistillerSR (SLR only). No evidence→dossier infrastructure. Dominant method: HEOR consultant hours billed per country.
+  </td>
+  <td class="dc alt">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:20%;background:#c87840"></div></div><span class="covlbl">Low · 20%</span></div>
+    Specialist pricing consultancies (IQVIA, Evidera). Health economic tools (TreeAge, R). No integrated platform connecting evidence to pricing inputs.
+  </td>
+  <td class="dc">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:45%;background:#c8a040"></div></div><span class="covlbl">Partial · 45%</span></div>
+    Flatiron, IQVIA RWD, Datavant. Strong RWE platforms but fully disconnected from HTA dossier workflow.
+  </td>
+  <td class="dc alt">
+    <div class="covrow"><div class="covbar"><div class="covfill" style="width:8%;background:#c85a5a"></div></div><span class="covlbl">Very low · 8%</span></div>
+    Full restart of manual HEOR workflow for every new indication. No cross-indication evidence reuse infrastructure exists anywhere in the market.
+  </td>
+</tr>
+
+<!-- VERUM -->
+<tr>
+  <td class="rh">Verum</td>
+  <td class="dc">
+    <div><span class="vbadge vbnone">Out of scope</span></div>
+    Long-term Phase C opportunity: evidence graph could surface which indication/population combos have the strongest historical HTA acceptance rates.
+  </td>
+  <td class="dc alt">
+    <div><span class="vbadge vb2">V2 — Core value prop 🎯</span></div>
+    Mine published HTA decisions → extract implied PICO per country → output minimum covering evidence set and country gap analysis. The evidence strategy question nobody has answered as infrastructure. Replaces €50–200K consulting engagements.
+  </td>
+  <td class="dc">
+    <div><span class="vbadge vbnone">Out of scope</span></div>
+    Clinical operations space. HEOR barely present. No Verum angle.
+  </td>
+  <td class="dc alt">
+    <div><span class="vbadge vb2">V2 — Signal</span></div>
+    End of Phase II: HEOR asks "which endpoint will HTA agencies accept?" Verum's PICO database answers from historical decisions — informing Phase III design before it's locked and costly to change.
+  </td>
+  <td class="dc">
+    <div><span class="vbadge vb1">V1 — Baseline</span></div>
+    EvidenceUnit structuring of the SLR component. As trials complete, Verum structures and versions the comparator evidence set — ready to feed the dossier phase without rebuilding from scratch per country.
+  </td>
+  <td class="dc alt">
+    <div><span class="vbadge vbnone">Adjacent input</span></div>
+    EPAR is a key input to Verum V2 corpus. Published regulatory assessments reveal accepted evidence standards per indication and become structured data.
+  </td>
+  <td class="dc">
+    <div><span class="vbadge vb1">V1 — Core value prop 🎯</span></div>
+    EvidenceUnit DB → localisation engine → country dossier with full citation trail. The entire V1 architecture is built for this phase. HITL at every gate. Replaces manual Word/Excel → consultant cycle per country.
+  </td>
+  <td class="dc alt">
+    <div><span class="vbadge vbnone">V2+ deferred</span></div>
+    CIPM pricing data restricted — correctly deferred. Long-term: structured outcome data (OS HR, PFS, QoL) from EvidenceUnits could feed economic models directly, connecting evidence layer to pricing layer.
+  </td>
+  <td class="dc">
+    <div><span class="vbadge vbnone">Adjacent</span></div>
+    RWE publications eventually become EvidenceUnits — feeding updated dossiers for label extensions or re-assessments when MEA obligations come due.
+  </td>
+  <td class="dc alt">
+    <div><span class="vbadge vb2">V2 — High value 🎯</span></div>
+    Cross-indication reuse: an EvidenceUnit from lung cancer may partially satisfy the PICO for bladder cancer in the same drug program. Verum surfaces reuse opportunities — compressing timelines and SLR costs on new submissions in the same therapeutic area.
+  </td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+</body>
+</html>
