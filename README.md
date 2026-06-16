@@ -1,53 +1,76 @@
 # Verum — HTA Evidence Intelligence Platform
 
-> Concept architecture · March 2026 · Portfolio artifact
+Concept architecture · March 2026 · Portfolio artifact
+
+**Prototype:** https://mczuzu.github.io/verum/
+Interactive demo · Pembrolizumab NSCLC · Real HTA data · Full four-step workflow
 
 ---
 
 ## What It Is
 
-Verum is a structured evidence intelligence platform designed for pharmaceutical HTA (Health Technology Assessment) workflows. It mines published HTA decisions — Spanish IPTs, NICE STAs, G-BA dossiers, HAS decisions — extracts the implied PICO specifications from each, and maps them cross-country to surface the minimum evidence set needed to satisfy multiple national markets for a given drug and indication.
+Verum mines published HTA (Health Technology Assessment) decision documents across EU agencies — Spanish IPTs (Informes de Posicionamiento Terapéutico), NICE (National Institute for Health and Care Excellence) STAs (Single Technology Appraisals), G-BA (Gemeinsamer Bundesausschuss) dossiers, HAS decisions — extracts the implicit PICO (Population, Intervention, Comparator, Outcome) specifications each agency actually accepted, and maps them cross-country to show where requirements converge and where they diverge.
 
-This repository documents the concept architecture, data model, and pipeline design. It is a portfolio artifact developed alongside [Evidence Mapper](https://evidence-mapper.com) to demonstrate product and data architecture thinking in regulated health data contexts.
+The result: before you lock a Phase III protocol, you know which comparator satisfies all target markets, which biomarker thresholds need dual assays, and which endpoints must be co-powered.
 
-**Status:** Architecture designed and validated. Data model complete. UI prototype live.
+**Status:** Concept validated. Data model complete. UI prototype live. No paying customers yet.
 
----
-
-## Prototype
-
-[![Verum UI prototype — Evidence Browser](preview.png)](https://mczuzu.github.io/verum/prototype.html)
-
-> UI prototype showing the Evidence Browser, PICO-structured evidence units across AEMPS, NICE, and G-BA, and the Gap Analysis view.
-> [**Open prototype →**](https://mczuzu.github.io/verum/prototype.html)
 ---
 
 ## The Core Insight
 
-Every published HTA decision contains an **implicit study specification**: the population, comparator, endpoints, and study design that the agency actually accepted. That specification is machine-extractable from narrative PDFs using structured LLM extraction.
+Every published HTA decision contains an implicit study specification: the population, comparator, endpoints, and study design that the agency actually accepted. That specification is machine-extractable from narrative PDFs using structured LLM (Large Language Model) extraction.
 
-An IPT (Spain) is not just a decision document — it is a reverse-engineered study protocol. Mine enough of them and you have a rules engine. The corpus is entirely public. Nobody has built a structured database from it.
+An IPT is not just a decision document — it is a reverse-engineered study protocol. Mine enough of them and you have a rules engine. The corpus is entirely public. Nobody has structured it into a queryable cross-country database.
 
 ---
 
 ## The Problem It Solves
 
-Pharma HEOR teams preparing for multi-country market access ask: *what study design satisfies Spain, Germany, France, and the UK simultaneously — and where do their requirements diverge?*
+**550+ AEMPS IPTs published. 2,500+ EU HTA decisions publicly available. 0 structured as a queryable database.**
 
-Today this is a manual consulting engagement costing €50,000–200,000 and taking several weeks. Verum answers it with every inference traceable to a specific published HTA decision.
+Pharma companies run the trials. They have the data. The problem is that AEMPS, NICE, G-BA, and HAS each ask a slightly different question about that same evidence — and each question changes depending on what they've accepted for similar drugs before. Nobody has structured that institutional memory.
+
+HEOR (Health Economics and Outcomes Research) teams face three recurring, avoidable failures:
+
+**01 — Wrong comparator, wrong country**
+G-BA uses platinum-pemetrexed as SoC (Standard of Care) for non-squamous NSCLC (Non-Small Cell Lung Cancer). AEMPS and NICE accept platinum-based chemotherapy broadly. A trial designed against one SoC fails AMNOG (Arzneimittelmarktneuordnungsgesetz) assessment regardless of OS (Overall Survival) results.
+
+**02 — Biomarker fragmentation**
+AEMPS accepted PD-L1 CPS ≥ 10. NICE and G-BA require TPS ≥ 50%. Different assays, different thresholds, different eligible populations. Without both pre-specified in Phase III, you cannot satisfy all three markets.
+
+**03 — 100 days from JCA scope to dossier deadline**
+Since January 2025, the EU HTAR (Health Technology Assessment Regulation) mandates JCAs (Joint Clinical Assessments) for all new oncology products. The scope document defining required evidence arrives only 100 days before the dossier deadline. Preparation must start years earlier, against precedents that haven't been published yet.
+
+Today, answering these questions is a manual consulting engagement costing €50,000–200,000 over several weeks. Verum answers it with every inference traceable to a specific published HTA decision.
 
 ---
 
-## Architecture
+## How It Works — Four Steps
 
-Four pipeline layers, each gated by explicit human approval before advancing.
+**01 — Mine decisions**
+Every published HTA decision — Spanish IPTs, NICE STAs, G-BA dossiers, HAS decisions — is ingested and parsed. LLM extraction pulls the implicit PICO from each document, always linked to the source paragraph.
 
-| Layer | Input | Process | Output |
-|---|---|---|---|
-| **1 — Ingestion** | Published HTA decision PDFs (IPTs, STAs, G-BA, HAS) | LLM extraction with structured PICO prompts | Raw evidence bundles in JSON |
-| **2 — Structuring** | Raw JSON bundles | Schema validation + human field-by-field review | Validated EvidenceUnit database |
-| **3 — Localisation** | EvidenceUnits + country HTA rules | Rules + LLM hybrid mapping to national templates | Draft dossier skeleton, section-by-section |
-| **4 — Output** | Approved section map | Document generation with inline citation trail | Word/PDF with EvidenceUnit citations per claim |
+**02 — Structure evidence**
+Extractions are validated by a human reviewer before being committed to the database. Every EvidenceUnit is versioned, auditable, and traceable — not a summarisation, a structured data object with a complete audit trail.
+
+**03 — Map divergences**
+Cross-country PICO matrix showing where agencies align and where they diverge — population, biomarker, comparator, endpoint, study design — including JCA consolidated scope as European reference layer.
+
+**04 — Recommend action**
+Strategic recommendations calibrated to your stage: Phase II→III protocol design, pre-launch market sequencing, dossier preparation, new indication planning, or competitive intelligence. The analysis tells you what to do next.
+
+---
+
+## Who It's For — Five Decision Moments
+
+| Moment | Users | Value |
+|---|---|---|
+| Phase II → III | HEOR · Clinical Development | Lock the right protocol before the trial runs |
+| Pre-launch | Market Access · HEOR | Sequence markets by evidence gaps, not assumptions |
+| Dossier preparation | Regulatory Affairs · HEOR | Write what each agency expects, not a generic package |
+| New indication | Clinical Development | Reuse existing evidence before commissioning new studies |
+| Market intelligence | Market Access · Strategy | Track agency PICO signals as the corpus updates |
 
 ---
 
@@ -55,74 +78,89 @@ Four pipeline layers, each gated by explicit human approval before advancing.
 
 The minimum reusable evidence object. One EvidenceUnit can populate multiple country dossiers. Stored as JSONB in PostgreSQL/Supabase, indexed by indication composite key: `{drug_id, condition_code, subgroup_filter, line_of_therapy}`.
 
-Schema is aligned with GRADE evidence tables and PRISMA reporting standards.
+Schema aligned with GRADE evidence tables and PRISMA reporting standards.
 
 | Field | Description | Example |
 |---|---|---|
 | `study_reference` | Source ID, database, study type | PubMed 38291045, RCT |
 | `population_json` | PICO P: inclusion criteria, sample size | NSCLC stage III/IV, n=847 |
 | `intervention_json` | PICO I: drug, dose, duration | Pembrolizumab 200mg Q3W |
-| `comparator_json` | PICO C: standard of care, active comparator | Platinum-based chemo |
-| `outcome_json` | PICO O: endpoint, numeric value, CI | OS HR 0.73 [0.58–0.92] |
+| `comparator_json` | PICO C: SoC, active comparator | Platinum-based chemo |
+| `outcome_json` | PICO O: endpoint, value, CI | OS HR 0.73 [0.58–0.92] |
 | `evidence_quality` | GRADE level, risk of bias — human-assigned | High, low risk of bias |
 | `hta_context_json` | Country, agency, applicable guidelines | ES, AEMPS, IPT criteria |
-| `version` | Append-only audit trail — never overwrite | v1.2, updated 2026-01-15 |
-| `extraction_meta` | LLM model version, prompt template version, confidence per field | gpt-4o, prompt-v3, OS: 0.91 |
+| `version` | Append-only audit trail — never overwrite | v1.2, 2026-01-15 |
+| `extraction_meta` | LLM model, prompt version, confidence per field | claude-3, prompt-v3, OS: 0.91 |
 
 ---
 
 ## Human-in-the-Loop Design
 
-Every pipeline phase produces a draft that a human must approve before the pipeline advances. The audit trail captures who approved, what version, when, and with what role.
-
-| Phase | Human Task | Effort |
-|---|---|---|
-| P1 — Ingestion | HEOR Scientist reviews retrieved study set; approves or refines query | ~1–2 hrs per indication |
-| P2 — Structuring | Field-by-field EvidenceUnit review; GRADE assignment validated | ~3–5 min per unit |
-| P3 — Localisation | Section mapping review; evidence gaps resolved; comparator confirmed | ~2–4 hrs per country |
-| P4 — Output | Full dossier draft reviewed; citations verified; Medical Director sign-off | ~4–8 hrs from complete draft |
+Every pipeline phase produces a draft requiring human approval before the pipeline advances. The audit trail captures who approved, what version, when, and with what role.
 
 This is not a constraint — it is the trust model. No AI tool in HTA has been accepted at submission level without full human accountability.
+
+| Phase | Human task | Estimated effort |
+|---|---|---|
+| P1 — Ingestion | HEOR Scientist reviews retrieved study set; approves or refines query | ~1–2 hrs / indication |
+| P2 — Structuring | Field-by-field EvidenceUnit review; GRADE assignment validated | ~3–5 min / unit |
+| P3 — Localisation | Section mapping review; evidence gaps resolved; comparator confirmed | ~2–4 hrs / country |
+| P4 — Output | Full dossier draft reviewed; citations verified; Medical Director sign-off | ~4–8 hrs / dossier |
 
 ---
 
 ## Regulatory Context
 
-The EU HTA Regulation (HTAR) entered into force January 2025. All new oncology products are now subject to Joint Clinical Assessments (JCAs). The JCA implementing act requires SLR searches no older than 3 months, with the final JCA scope issued only 100 days before the submission deadline.
+The EU HTAR entered into force January 2025. All new oncology products are subject to JCAs. The JCA implementing act requires SLR (Systematic Literature Review) searches no older than 3 months, with the final scope issued only 100 days before the submission deadline.
 
 This compresses timelines brutally. Reusable, versioned EvidenceUnits are the architectural answer to a blank-page rebuild under time pressure.
 
 ---
 
-## Data Sources
+## The Corpus
 
-| Source | Access | Notes |
+All sources are publicly available. The gap is not access — it is structure.
+
+| Source | Volume | Notes |
 |---|---|---|
-| AEMPS IPT corpus (Spain) | Public PDFs | ~125 published per year; requires PDF parsing + OCR for older docs |
-| NICE STAs (UK) | Public PDFs | Structured URLs, downloadable |
-| G-BA dossiers (Germany) | Public PDFs | |
-| HAS decisions (France) | Public PDFs | |
-| PubMed / ClinicalTrials.gov | Public REST APIs | Rate-limited; free with API key |
-| Embase | Licensed | Table-stakes for HTA literature searches; client-provided or CRO partnership |
+| AEMPS IPTs (Spain) | 550+ total · 125/year · 60 oncology in 2024 | PDF parsing + OCR for older docs |
+| NICE STAs (UK) | Part of 2,500+ EU decisions | Structured URLs, downloadable |
+| G-BA dossiers (Germany) | Part of 2,500+ EU decisions | Public PDFs |
+| HAS decisions (France) | Part of 2,500+ EU decisions | Public PDFs |
+| PubMed / ClinicalTrials.gov | — | Public REST APIs, rate-limited |
+| Embase | Licensed | Client-provided or CRO partnership |
 
 ---
 
 ## Tech Stack (Designed)
 
-- **Database:** PostgreSQL / Supabase — JSONB fields, append-only EvidenceUnit records
-- **Extraction:** OpenAI GPT-4 / Claude — structured PICO prompts, confidence scoring per field
-- **Document output:** python-docx, pandoc
-- **Frontend:** React + TypeScript + Tailwind
-- **Hosting:** Vercel
+| Layer | Technology |
+|---|---|
+| Database | PostgreSQL / Supabase — JSONB, append-only EvidenceUnit records |
+| Extraction | Claude / GPT-4 — structured PICO prompts, confidence scoring per field |
+| Document output | python-docx, pandoc |
+| Frontend | React + TypeScript + Tailwind CSS |
+| Hosting | GitHub Pages (prototype) |
 
 ---
 
 ## What This Is Not
 
 - Not an AI that writes HTA dossiers — output is structured evidence intelligence, not regulatory narrative
-- Not a literature search engine — it does not replace PubMed or Embase queries
-- Not a substitute for HEOR expert judgement — it informs decisions, it does not make them
-- Not a built product — this is a validated concept with a complete architecture and a documented gap
+- Not a literature search engine — does not replace PubMed or Embase queries
+- Not a substitute for HEOR expert judgement — informs decisions, does not make them
+- Not a built product — validated concept with complete architecture and documented gap
+
+---
+
+## Related
+
+**Evidence Mapper** — live AI-assisted pipeline over 63,000+ completed ClinicalTrials.gov trials. Built with the same HITL (Human-in-the-Loop) and structured data extraction principles that underpin Verum's architecture. [evidence-mapper.com](https://evidence-mapper.com)
+
+---
+
+María Castro · March 2026
+
 
 ---
 
